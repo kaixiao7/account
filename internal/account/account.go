@@ -124,8 +124,10 @@ func initConfig() {
 	viper.SetConfigType("yaml")
 
 	// 读取配置文件内容
-	if err := viper.ReadInConfig(); err != nil {
+	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	} else {
+		panic(err)
 	}
 }
 
