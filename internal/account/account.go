@@ -7,6 +7,7 @@ import (
 	"kaixiao7/account/internal/account/store"
 	"kaixiao7/account/internal/pkg/middleware"
 	"kaixiao7/account/internal/pkg/token"
+	"kaixiao7/account/internal/pkg/validatetrans"
 	"net/http"
 	"os"
 	"os/signal"
@@ -71,6 +72,11 @@ func run() error {
 
 	// 初始化jwt相关设置
 	token.Init(viper.GetString("jwt.secret"), viper.GetInt("jwt.expire"))
+
+	// 初始化gin参数验证翻译器
+	if err := validatetrans.Init(); err != nil {
+		return err
+	}
 
 	// 设置gin
 	gin.SetMode(viper.GetString("run_mode"))
