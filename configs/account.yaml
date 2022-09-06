@@ -1,0 +1,20 @@
+run_mod: debug
+port: :8080
+jwt:
+  secret: RtgYsliaukijq8s2l9p3a4UQBb7
+  expire: 2
+
+log:
+  level: debug
+  path: "./logs"
+  filename: "account.log"
+  enable-stdout: true
+
+db:
+  host: localhost:3306
+  username: root
+  password: 123456
+  database: account
+  max-idle-connections: 10 # mysql 最大空闲连接数
+  max-open-connections: 10 # mysql 最大打开连接数
+  max-connection-life-time: 30 # mysql 空闲连接最大存活时间 30s
