@@ -13,8 +13,8 @@ type LoginResponse struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" binding:"required,alphanum,max=20"`
+	Password string `json:"password" binding:"required,min=6,max=20"`
 }
 
 // Login 用户登录
@@ -23,7 +23,7 @@ func (u *UserController) Login(c *gin.Context) {
 
 	// 绑定数据
 	if err := c.ShouldBindJSON(&r); err != nil {
-		core.WriteRespErr(c, errno.NewWithError(errno.ErrBind, err))
+		core.WriteRespErr(c, err)
 		return
 	}
 
