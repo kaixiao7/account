@@ -32,8 +32,8 @@ func New(errno *Errno) *Err {
 
 func (e Err) Error() string {
 	if e.Err == nil {
-		return fmt.Sprintf("Err - code: %d", e.Errno.Code)
+		return fmt.Sprintf("Err - code: %d, message: %s", e.Errno.Code, e.Errno.Message)
 	}
 
-	return fmt.Sprintf("Err - code: %d, error: %s", e.Errno.Code, e.Err)
+	return fmt.Sprintf("Err - code: %d, message: %s, error: %s", e.Errno.Code, e.Errno.Message, e.Err)
 }
