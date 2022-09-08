@@ -1,11 +1,14 @@
 package account
 
 import (
-	"github.com/gin-gonic/gin"
+	"kaixiao7/account/internal/account/controller/book"
+	"kaixiao7/account/internal/account/controller/budget"
 	"kaixiao7/account/internal/account/controller/user"
 	"kaixiao7/account/internal/pkg/core"
 	"kaixiao7/account/internal/pkg/errno"
 	"kaixiao7/account/internal/pkg/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 func loadRouter(g *gin.Engine, mw ...gin.HandlerFunc) {
@@ -28,8 +31,25 @@ func installController(g *gin.Engine) {
 
 	g.POST("/login", userController.Login)
 
-	users := g.Group("/user", middleware.Auth())
+	g.Use(middleware.Auth())
+
+	users := g.Group("/users")
 	{
 		users.GET("/info", userController.Get)
+	}
+
+	books := g.Group("/books")
+	{
+		bookController := book.NewBookContorller()
+
+		books.GET("", bookController.List)
+	}
+
+	budgets := g.Group("/books/:bookId/budgets")
+	{
+		budgetController := budget.NewBudgetController()
+
+		budgets.GET("", budgetController.Get)
+		budgets.PUT(":budgetId", budgetController.Put)
 	}
 }
