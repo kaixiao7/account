@@ -56,7 +56,7 @@ func NewAccountServerCommand() *cobra.Command {
 
 func run() error {
 	// 初始化数据库配置
-	err := store.Init(&store.DBOption{
+	db, err := store.Init(&store.DBOption{
 		Host:                  viper.GetString("db.host"),
 		Username:              viper.GetString("db.username"),
 		Password:              viper.GetString("db.password"),
@@ -73,7 +73,7 @@ func run() error {
 	// 初始化jwt相关设置
 	token.Init(viper.GetString("jwt.secret"), viper.GetInt("jwt.expire"))
 
-	// 初始化gin参数验证翻译器
+	// 初始化gin参数验证
 	if err := validatetrans.Init(); err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func run() error {
 	// 设置gin
 	gin.SetMode(viper.GetString("run_mode"))
 	g := gin.New()
-	loadRouter(g, middleware.RequestId())
+	loadRouter(g, middleware.RequestId(), middleware.SqlDB(db))
 
 	server := &http.Server{
 		Addr:    viper.GetString("port"),

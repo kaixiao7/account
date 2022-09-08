@@ -1,46 +1,55 @@
 package store
 
 import (
-	"errors"
-	"gorm.io/gorm"
+	"context"
+	"fmt"
 	"kaixiao7/account/internal/account/model"
-	"kaixiao7/account/internal/pkg/errno"
+
+	"github.com/pkg/errors"
 )
 
 type UserStore interface {
-	GetByUsername(username string) (*model.User, error)
-	GetById(id int) (*model.User, error)
+	GetByUsername(ctx context.Context, username string) (*model.User, error)
+	GetById(ctx context.Context, id int) (*model.User, error)
 }
 
 type user struct {
-	db *gorm.DB
 }
+
+var base_field = "id, username, ifnull(phone, '') as phone, ifnull(wx_id, '') as wx_id, gender, password, avatar, register_time, update_time"
 
 func NewUserStore() UserStore {
-	return &user{db: db}
+	return &user{}
 }
 
-func (u *user) GetByUsername(username string) (*model.User, error) {
-	user := &model.User{}
-	err := u.db.Where("username = ?", username).First(&user).Error
+func (u *user) GetByUsername(ctx context.Context, username string) (*model.User, error) {
+	db := getDBFromContext(ctx)
+
+	sql := fmt.Sprintf("select %s from user where username = ?", base_field)
+	user := model.User{}
+	err := db.Get(&user, sql, username)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errno.New(errno.ErrUserNotFound)
-		}
-		return nil, err
+		return nil, errors.Wrap(err, "get by username")
 	}
 
-	return user, nil
+	// row := db.QueryRowx("select * from user where username = ? limit 1", username)
+	// err := row.StructScan(&user)
+	// if err != nil {
+	// 	return nil, errors.Wrap(err, "get by username")
+	// }
+
+	return &user, nil
 }
 
-func (u *user) GetById(id int) (*model.User, error) {
-	user := &model.User{}
-	err := u.db.First(&user, id).Error
+func (u *user) GetById(ctx context.Context, id int) (*model.User, error) {
+	db := getDBFromContext(ctx)
+
+	sql := fmt.Sprintf("select %s from user where id = ?", base_field)
+	user := model.User{}
+	err := db.Get(&user, sql, id)
+
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errno.New(errno.ErrUserNotFound)
-		}
 		return nil, err
 	}
-	return user, nil
+	return &user, nil
 }
