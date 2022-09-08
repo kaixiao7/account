@@ -11,10 +11,7 @@ log:
   enable-stdout: true
 
 db:
-  host: localhost:3306
-  username: root
-  password: 123456
-  database: account
-  max-idle-connections: 10 # mysql 最大空闲连接数
-  max-open-connections: 10 # mysql 最大打开连接数
-  max-connection-life-time: 30 # mysql 空闲连接最大存活时间 30s
+  file: ./account.db  # sqlite数据库文件的位置
+  max-idle-connections: 10 # 最大空闲连接数
+  max-open-connections: 10 # 最大打开连接数
+  max-connection-life-time: 30 # 空闲连接最大存活时间 30s
