@@ -1,14 +1,30 @@
 package store
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
+	"kaixiao7/account/internal/pkg/constant"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
-var db *gorm.DB
+type Queryer interface {
+	Exec(query string, args ...any) (sql.Result, error)
+	Query(query string, args ...any) (*sql.Rows, error)
+	QueryRow(query string, args ...any) *sql.Row
+	Prepare(query string) (*sql.Stmt, error)
+
+	Get(dest any, query string, args ...any) error
+	Select(dest any, query string, args ...any) error
+	Queryx(query string, args ...any) (*sqlx.Rows, error)
+	QueryRowx(query string, args ...any) *sqlx.Row
+	Preparex(query string) (*sqlx.Stmt, error)
+}
+
+var db *sqlx.DB
 
 // DBOption 数据库连接参数
 type DBOption struct {
@@ -21,17 +37,18 @@ type DBOption struct {
 	MaxConnectionLifeTime int
 }
 
-func Init(option *DBOption) error {
-	g, err := newDB(option)
+func Init(option *DBOption) (*sqlx.DB, error) {
+	sqlxDB, err := newDB(option)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	db = g
-	return nil
+	db = sqlxDB
+
+	return sqlxDB, nil
 }
 
-func newDB(opts *DBOption) (*gorm.DB, error) {
+func newDB(opts *DBOption) (*sqlx.DB, error) {
 	dsn := fmt.Sprintf(`%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=%t&loc=%s`,
 		opts.Username,
 		opts.Password,
@@ -40,16 +57,7 @@ func newDB(opts *DBOption) (*gorm.DB, error) {
 		true,
 		"Local")
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true,
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	sqlDb, err := db.DB()
+	sqlDb, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +66,9 @@ func newDB(opts *DBOption) (*gorm.DB, error) {
 	sqlDb.SetMaxIdleConns(opts.MaxIdleConnections)
 	sqlDb.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
 
-	return db, nil
+	sqlxDB := sqlx.NewDb(sqlDb, "mysql")
+
+	return sqlxDB, nil
 }
 
 func Close() error {
@@ -66,10 +76,13 @@ func Close() error {
 		return nil
 	}
 
-	d, err := db.DB()
-	if err != nil {
-		return err
-	}
-
-	return d.Close()
+	return db.Close()
 }
+
+func getDBFromContext(ctx context.Context) Queryer {
+	db := ctx.Value(constant.SqlDBKey)
+	return db.(Queryer)
+}
+
+var _ Queryer = (*sqlx.DB)(nil)
+var _ Queryer = (*sqlx.Tx)(nil)

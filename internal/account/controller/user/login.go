@@ -1,11 +1,12 @@
 package user
 
 import (
-	"github.com/gin-gonic/gin"
 	"kaixiao7/account/internal/pkg/auth"
 	"kaixiao7/account/internal/pkg/core"
 	"kaixiao7/account/internal/pkg/errno"
 	"kaixiao7/account/internal/pkg/token"
+
+	"github.com/gin-gonic/gin"
 )
 
 type LoginResponse struct {
@@ -28,7 +29,7 @@ func (u *UserController) Login(c *gin.Context) {
 	}
 
 	// 数据库查询用户信息
-	user, err := u.userSrv.Get(r.Username)
+	user, err := u.userSrv.Get(c, r.Username)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return
