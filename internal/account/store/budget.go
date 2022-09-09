@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+
 	"kaixiao7/account/internal/account/model"
 
 	"github.com/pkg/errors"
@@ -21,7 +22,7 @@ func NewBudgetStore() BudgetStore {
 	return &budget{}
 }
 
-// SetBudget 添加账本总预算
+// AddBudget 添加账本总预算
 func (b *budget) AddBudget(ctx context.Context, budget *model.Budget) error {
 	db := getDBFromContext(ctx)
 	sql := "insert into budget_setting(budget, book_id, type, category_id, create_id, create_time, update_time) values(?, ?, ?, ?, ?, ?, ?)"

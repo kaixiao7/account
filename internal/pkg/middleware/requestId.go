@@ -1,9 +1,10 @@
 package middleware
 
 import (
+	"kaixiao7/account/internal/pkg/constant"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"kaixiao7/account/internal/pkg/constant"
 )
 
 // RequestId 注入"X-Request-ID"到context和req/resp的header中
