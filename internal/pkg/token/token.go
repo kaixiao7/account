@@ -1,10 +1,11 @@
 package token
 
 import (
-	jwt "github.com/golang-jwt/jwt/v4"
 	"strconv"
 	"sync"
 	"time"
+
+	jwt "github.com/golang-jwt/jwt/v4"
 )
 
 type config struct {

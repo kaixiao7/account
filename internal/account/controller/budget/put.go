@@ -1,10 +1,11 @@
 package budget
 
 import (
+	"strconv"
+
 	"kaixiao7/account/internal/account/controller"
 	"kaixiao7/account/internal/pkg/core"
 	"kaixiao7/account/internal/pkg/errno"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +14,7 @@ type budgetRequest struct {
 	Budget float32 `json:"budget"`
 }
 
-// 更新账本预算
+// Put 更新账本预算
 func (b *BudgetController) Put(c *gin.Context) {
 	// 从body中获取json请求参数
 	var budgetReq budgetRequest

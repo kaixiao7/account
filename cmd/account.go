@@ -1,8 +1,9 @@
 package main
 
 import (
-	"kaixiao7/account/internal/account"
 	"os"
+
+	"kaixiao7/account/internal/account"
 )
 
 func main() {

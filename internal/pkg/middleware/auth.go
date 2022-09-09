@@ -2,12 +2,14 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
+
 	"kaixiao7/account/internal/pkg/constant"
 	"kaixiao7/account/internal/pkg/core"
 	"kaixiao7/account/internal/pkg/errno"
 	"kaixiao7/account/internal/pkg/log"
 	"kaixiao7/account/internal/pkg/token"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Auth() gin.HandlerFunc {
