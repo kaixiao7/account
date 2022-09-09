@@ -3,6 +3,7 @@ package account
 import (
 	"kaixiao7/account/internal/account/controller/book"
 	"kaixiao7/account/internal/account/controller/budget"
+	"kaixiao7/account/internal/account/controller/category"
 	"kaixiao7/account/internal/account/controller/user"
 	"kaixiao7/account/internal/pkg/core"
 	"kaixiao7/account/internal/pkg/errno"
@@ -51,5 +52,12 @@ func installController(g *gin.Engine) {
 
 		budgets.GET("", budgetController.Get)
 		budgets.PUT(":budgetId", budgetController.Put)
+	}
+
+	categories := g.Group("/books/:bookId/categories")
+	{
+		categoryController := category.NewCategoryController()
+
+		categories.GET("", categoryController.List)
 	}
 }
