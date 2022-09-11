@@ -48,7 +48,7 @@ func (l *Logger) Debug(msg string, fields ...Field) {
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	l.logger.Sugar().Debugf(format, v)
+	l.logger.Sugar().Debugf(format, v...)
 }
 
 func (l *Logger) Info(msg string, fields ...Field) {
@@ -56,7 +56,7 @@ func (l *Logger) Info(msg string, fields ...Field) {
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
-	l.logger.Sugar().Infof(format, v)
+	l.logger.Sugar().Infof(format, v...)
 }
 
 func (l *Logger) Warn(msg string, fields ...Field) {
@@ -64,7 +64,7 @@ func (l *Logger) Warn(msg string, fields ...Field) {
 }
 
 func (l *Logger) Warnf(format string, v ...interface{}) {
-	l.logger.Sugar().Warnf(format, v)
+	l.logger.Sugar().Warnf(format, v...)
 }
 
 func (l *Logger) Error(msg string, fields ...Field) {
@@ -72,7 +72,7 @@ func (l *Logger) Error(msg string, fields ...Field) {
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	l.logger.Sugar().Errorf(format, v)
+	l.logger.Sugar().Errorf(format, v...)
 }
 
 func (l *Logger) DPanic(msg string, fields ...Field) {
@@ -80,7 +80,7 @@ func (l *Logger) DPanic(msg string, fields ...Field) {
 }
 
 func (l *Logger) DPanicf(format string, v ...interface{}) {
-	l.logger.Sugar().DPanicf(format, v)
+	l.logger.Sugar().DPanicf(format, v...)
 }
 
 func (l *Logger) Panic(msg string, fields ...Field) {
@@ -88,7 +88,7 @@ func (l *Logger) Panic(msg string, fields ...Field) {
 }
 
 func (l *Logger) Panicf(format string, v ...interface{}) {
-	l.logger.Sugar().Panicf(format, v)
+	l.logger.Sugar().Panicf(format, v...)
 }
 
 func (l *Logger) Fatal(msg string, fields ...Field) {
@@ -96,7 +96,7 @@ func (l *Logger) Fatal(msg string, fields ...Field) {
 }
 
 func (l *Logger) Fatalf(format string, v ...interface{}) {
-	l.logger.Sugar().Fatalf(format, v)
+	l.logger.Sugar().Fatalf(format, v...)
 }
 
 func (l *Logger) Sync() error {
