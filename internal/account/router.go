@@ -1,6 +1,7 @@
 package account
 
 import (
+	"kaixiao7/account/internal/account/controller/bill"
 	"kaixiao7/account/internal/account/controller/book"
 	"kaixiao7/account/internal/account/controller/budget"
 	"kaixiao7/account/internal/account/controller/category"
@@ -59,5 +60,15 @@ func installController(g *gin.Engine) {
 		categoryController := category.NewCategoryController()
 
 		categories.GET("", categoryController.List)
+	}
+
+	bills := g.Group("/books/:bookId/bills")
+	{
+		billController := bill.NewBillController()
+
+		bills.POST("", billController.Add)
+		bills.GET("", billController.List)
+		bills.PUT(":billId", billController.Update)
+		bills.DELETE(":billId", billController.Delete)
 	}
 }

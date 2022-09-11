@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 
 	"kaixiao7/account/internal/account/model"
 
@@ -12,6 +13,9 @@ type CategoryStore interface {
 	QueryAll(ctx context.Context, bookId int) ([]model.Category, error)
 	Add(ctx context.Context, category *model.Category) error
 	Update(ctx context.Context, category *model.Category) error
+
+	// QueryById 通过主键查询
+	QueryById(ctx context.Context, id int) (*model.Category, error)
 }
 
 type category struct {
@@ -33,6 +37,24 @@ func (c *category) QueryAll(ctx context.Context, bookId int) ([]model.Category, 
 	}
 
 	return categories, nil
+}
+
+// QueryById 通过主键查询
+func (c *category) QueryById(ctx context.Context, id int) (*model.Category, error) {
+	db := getDBFromContext(ctx)
+
+	querySql := "select * from category where id = ?"
+	var category model.Category
+	err := db.Get(&category, querySql, id)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "query category by id store.")
+	}
+
+	return &category, nil
 }
 
 func (c *category) Add(ctx context.Context, category *model.Category) error {
