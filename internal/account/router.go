@@ -5,6 +5,7 @@ import (
 	"kaixiao7/account/internal/account/controller/book"
 	"kaixiao7/account/internal/account/controller/budget"
 	"kaixiao7/account/internal/account/controller/category"
+	"kaixiao7/account/internal/account/controller/tag"
 	"kaixiao7/account/internal/account/controller/user"
 	"kaixiao7/account/internal/pkg/core"
 	"kaixiao7/account/internal/pkg/errno"
@@ -70,5 +71,13 @@ func installController(g *gin.Engine) {
 		bills.GET("", billController.List)
 		bills.PUT(":billId", billController.Update)
 		bills.DELETE(":billId", billController.Delete)
+	}
+
+	tags := g.Group("/tags")
+	{
+		tagController := tag.NewTagController()
+
+		// 查询标签，需要查询参数bookId，/tags?bookId=1
+		tags.GET("", tagController.List)
 	}
 }

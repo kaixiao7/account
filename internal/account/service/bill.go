@@ -23,6 +23,9 @@ type BillSrv interface {
 
 	// QueryByTime 查询账本在指定月份的账单
 	QueryByTime(ctx context.Context, bookId, userId int, date time.Time) ([]model.Bill, error)
+
+	// QueryTag 查询账单标签/备注
+	QueryTag(ctx context.Context, bookId, userId int) ([]model.BillTag, error)
 }
 
 type billService struct {
@@ -61,6 +64,21 @@ func (b *billService) QueryByTime(ctx context.Context, bookId, userId int, date 
 	end := timex.GetLastDateOfMonth(date)
 
 	return b.billStore.QueryByTime(ctx, bookId, begin.Unix(), end.Unix())
+}
+
+// QueryTag 查询账单标签/备注
+func (b *billService) QueryTag(ctx context.Context, bookId, userId int) ([]model.BillTag, error) {
+	// 校验账本是否存在
+	_, err := b.checkBook(ctx, bookId)
+	if err != nil {
+		return nil, err
+	}
+	// 校验用户是否是账本的成员
+	if err := b.checkUserInBook(ctx, bookId, userId); err != nil {
+		return nil, err
+	}
+
+	return b.billStore.QueryBillTag(ctx, bookId)
 }
 
 // Add 添加账单
