@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// RequestId 注入"X-Request-ID"到context和req/resp的header中
+// SqlDB 将sqlx.DB放入上下文中，供store使用
 func SqlDB(db *sqlx.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set(constant.SqlDBKey, db)
