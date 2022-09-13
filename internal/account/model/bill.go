@@ -13,3 +13,8 @@ type Bill struct {
 	CreateTime int64   `db:"create_time" json:"create_time,omitempty"`
 	UpdateTime int64   `db:"update_time" json:"update_time,omitempty"`
 }
+
+type BillTag struct {
+	CategoryId int    `db:"category_id" json:"category_id"`
+	Remark     string `db:"remark" json:"tag"`
+}

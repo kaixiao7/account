@@ -23,6 +23,9 @@ type BillStore interface {
 	QueryByTime(ctx context.Context, bookId int, beginTime int64, endTime int64) ([]model.Bill, error)
 	// QueryById 根据主键id查询
 	QueryById(ctx context.Context, id int) (*model.Bill, error)
+
+	// QueryBillTag 查询账单的标签备注
+	QueryBillTag(ctx context.Context, bookId int) ([]model.BillTag, error)
 }
 
 type bill struct {
@@ -110,4 +113,24 @@ func (b *bill) QueryById(ctx context.Context, id int) (*model.Bill, error) {
 	}
 
 	return &bill, nil
+}
+
+// QueryBillTag 查询账单的标签备注
+func (b *bill) QueryBillTag(ctx context.Context, bookId int) ([]model.BillTag, error) {
+	db := getDBFromContext(ctx)
+
+	querySql := "SELECT category_id, group_concat(distinct remark) as remark from bill where book_id = ? " +
+		"group by category_id order by record_time desc"
+
+	var tags = []model.BillTag{}
+	err := db.Select(&tags, querySql, bookId)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "query bill tag store.")
+	}
+
+	return tags, nil
 }
