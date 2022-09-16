@@ -10,6 +10,7 @@ type Bill struct {
 	BookId     int     `db:"book_id" json:"book_id,omitempty" binding:"required,gte=1"`
 	AccountId  int     `db:"account_id" json:"account_id,omitempty" binding:"required,numeric"`
 	CategoryId int     `db:"category_id" json:"category_id,omitempty" binding:"required,min=1"`
+	Username   string  `db:"user_name" json:"username,omitempty" binding:"min=alphanum,max=20"`
 	CreateTime int64   `db:"create_time" json:"create_time,omitempty"`
 	UpdateTime int64   `db:"update_time" json:"update_time,omitempty"`
 }

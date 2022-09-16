@@ -32,6 +32,7 @@ type billService struct {
 	billStore     store.BillStore
 	categoryStore store.CategoryStore
 	bookStore     store.BookStore
+	userStore     store.UserStore
 }
 
 func NewBillSrv() BillSrv {
@@ -99,7 +100,7 @@ func (b *billService) Delete(ctx context.Context, billId, userId, bookId int) er
 	}
 	// 只有账单的拥有者才可以删除
 	if bill.UserId != userId || bill.BookId != bookId {
-		return errno.New(errno.ErrIllegalOperate)
+		return errno.New(errno.ErrBillNotDelete)
 	}
 	return WithTransaction(ctx, func(ctx context.Context) error {
 		err = b.billStore.Delete(ctx, billId)
@@ -131,7 +132,23 @@ func (b *billService) save(ctx context.Context, bill *model.Bill) error {
 		return err
 	}
 
+	// 如果是修改账单，只能自己修改自己的
+	if bill.Id > 0 {
+		if billBefore, err := b.queryBillById(ctx, bill.Id); err != nil {
+			return err
+		} else if billBefore.UserId != bill.UserId {
+			// 不允许修改他人账单
+			return errno.New(errno.ErrBillNotModify)
+		}
+	}
+
 	// todo 校验账户是否存在
+
+	user, err := b.userStore.GetById(ctx, bill.UserId)
+	if err != nil {
+		return err
+	}
+	bill.Username = user.Username
 
 	now := time.Now().Unix()
 	bill.CreateTime = now

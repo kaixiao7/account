@@ -39,12 +39,11 @@ func NewBillStore() BillStore {
 func (b *bill) Add(ctx context.Context, bill *model.Bill) error {
 	db := getDBFromContext(ctx)
 
-	sql := "insert into bill(cost, type, remark, record_time, user_id, book_id, account_id, category_id, " +
-		"create_time, update_time) " +
-		"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	sql := "insert into bill(cost, type, remark, record_time, user_id, book_id, account_id, category_id, user_name, create_time, update_time) " +
+		"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 	_, err := db.Exec(sql, bill.Cost, bill.Type, bill.Remark, bill.RecordTime, bill.UserId, bill.BookId,
-		bill.AccountId, bill.CategoryId, bill.CreateTime, bill.UpdateTime)
+		bill.AccountId, bill.CategoryId, bill.Username, bill.CreateTime, bill.UpdateTime)
 	if err != nil {
 		return errors.Wrap(err, "add bill store.")
 	}
@@ -56,7 +55,7 @@ func (b *bill) Add(ctx context.Context, bill *model.Bill) error {
 func (b *bill) Update(ctx context.Context, bill *model.Bill) error {
 	db := getDBFromContext(ctx)
 
-	sql := "update bill set cost=?,type=?,remark=?,record_time=?,user_id=?,account_id=?,category_id=?,update_time=? " +
+	sql := "update bill set cost=?,type=?,remark=?,record_time=?,user_id=?,account_id=?,category_id=?,update_time=?" +
 		"where id = ?"
 
 	_, err := db.Exec(sql, bill.Cost, bill.Type, bill.Remark, bill.RecordTime, bill.UserId, bill.AccountId,

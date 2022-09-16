@@ -21,6 +21,8 @@ var (
 
 	ErrBookNotFound = &Errno{Code: 10301, Message: "账本不存在"}
 
-	ErrBillNotFound = &Errno{Code: 10401, Message: "账单不存在"}
-	ErrBillNotMore  = &Errno{Code: 10402, Message: "没有更多了"}
+	ErrBillNotFound  = &Errno{Code: 10401, Message: "账单不存在"}
+	ErrBillNotMore   = &Errno{Code: 10402, Message: "没有更多了"}
+	ErrBillNotDelete = &Errno{Code: 10403, Message: "不允许删除他人账单"}
+	ErrBillNotModify = &Errno{Code: 10403, Message: "不允许修改他人账单"}
 )
