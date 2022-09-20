@@ -21,6 +21,8 @@ type BillStore interface {
 
 	// QueryByTime 根据时间范围查询账单
 	QueryByTime(ctx context.Context, bookId int, beginTime int64, endTime int64) ([]model.Bill, error)
+	// QueryByAssetIdAndTime 根据资产id和时间查询
+	QueryByAssetIdAndTime(ctx context.Context, assetId int, beginTime, endTime int64) ([]model.Bill, error)
 	// QueryById 根据主键id查询
 	QueryById(ctx context.Context, id int) (*model.Bill, error)
 
@@ -39,11 +41,11 @@ func NewBillStore() BillStore {
 func (b *bill) Add(ctx context.Context, bill *model.Bill) error {
 	db := getDBFromContext(ctx)
 
-	sql := "insert into bill(cost, type, remark, record_time, user_id, book_id, account_id, category_id, user_name, create_time, update_time) " +
+	sql := "insert into bill(cost, type, remark, record_time, user_id, book_id, asset_id, category_id, user_name, create_time, update_time) " +
 		"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 	_, err := db.Exec(sql, bill.Cost, bill.Type, bill.Remark, bill.RecordTime, bill.UserId, bill.BookId,
-		bill.AccountId, bill.CategoryId, bill.Username, bill.CreateTime, bill.UpdateTime)
+		bill.AssetId, bill.CategoryId, bill.Username, bill.CreateTime, bill.UpdateTime)
 	if err != nil {
 		return errors.Wrap(err, "add bill store.")
 	}
@@ -55,10 +57,10 @@ func (b *bill) Add(ctx context.Context, bill *model.Bill) error {
 func (b *bill) Update(ctx context.Context, bill *model.Bill) error {
 	db := getDBFromContext(ctx)
 
-	sql := "update bill set cost=?,type=?,remark=?,record_time=?,user_id=?,account_id=?,category_id=?,update_time=?" +
+	sql := "update bill set cost=?,type=?,remark=?,record_time=?,user_id=?,asset_id=?,category_id=?,update_time=?" +
 		"where id = ?"
 
-	_, err := db.Exec(sql, bill.Cost, bill.Type, bill.Remark, bill.RecordTime, bill.UserId, bill.AccountId,
+	_, err := db.Exec(sql, bill.Cost, bill.Type, bill.Remark, bill.RecordTime, bill.UserId, bill.AssetId,
 		bill.CategoryId, bill.UpdateTime, bill.Id)
 	if err != nil {
 		return errors.Wrap(err, "update bill store.")
@@ -89,6 +91,21 @@ func (b *bill) QueryByTime(ctx context.Context, bookId int, beginTime int64, end
 
 	var bills = []model.Bill{}
 	err := db.Select(&bills, sql, bookId, beginTime, endTime)
+	if err != nil {
+		return nil, errors.Wrap(err, "query bill store.")
+	}
+
+	return bills, nil
+}
+
+// QueryByAssetIdAndTime 根据资产id和时间查询
+func (b *bill) QueryByAssetIdAndTime(ctx context.Context, assetId int, beginTime, endTime int64) ([]model.Bill, error) {
+	db := getDBFromContext(ctx)
+
+	sql := "select * from bill where asset_id = ? and record_time >= ? and record_time <= ?"
+
+	var bills = []model.Bill{}
+	err := db.Select(&bills, sql, assetId, beginTime, endTime)
 	if err != nil {
 		return nil, errors.Wrap(err, "query bill store.")
 	}

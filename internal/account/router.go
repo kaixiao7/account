@@ -1,6 +1,8 @@
 package account
 
 import (
+	"kaixiao7/account/internal/account/controller/asset"
+	"kaixiao7/account/internal/account/controller/assetflow"
 	"kaixiao7/account/internal/account/controller/bill"
 	"kaixiao7/account/internal/account/controller/book"
 	"kaixiao7/account/internal/account/controller/budget"
@@ -79,5 +81,26 @@ func installController(g *gin.Engine) {
 
 		// 查询标签，需要查询参数bookId，/tags?bookId=1
 		tags.GET("", tagController.List)
+	}
+
+	assets := g.Group("/assets")
+	{
+		assetController := asset.NewAssetController()
+
+		assets.GET("", assetController.List)
+		assets.POST("", assetController.Add)
+		assets.PUT(":assetId", assetController.Update)
+		assets.DELETE(":assetId", assetController.Delete)
+		// assets.POST("/flow", assetController.AddFlow)
+	}
+
+	assetFlows := g.Group("/assets/:assetId/flows")
+	{
+		assetFlowController := assetflow.NewAssetFlowController()
+
+		assetFlows.GET("", assetFlowController.List)
+		assetFlows.POST("", assetFlowController.Add)
+		assetFlows.PUT(":assetFlowId", assetFlowController.Update)
+		assetFlows.DELETE(":assetFlowId", assetFlowController.Delete)
 	}
 }
