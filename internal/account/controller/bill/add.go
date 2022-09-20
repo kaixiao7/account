@@ -10,12 +10,12 @@ import (
 )
 
 type billReq struct {
-	Cost       float32        `db:"cost" json:"cost,omitempty" binding:"required,numeric"`
-	Type       *int8          `db:"type" json:"type,omitempty" binding:"required,gte=0,lte=1"`
-	Remark     string         `db:"remark" json:"remark,omitempty" binding:"required,max=200"`
-	RecordTime timex.JsonTime `db:"record_time" json:"record_time" binding:"required"`
-	AccountId  int            `db:"account_id" json:"account_id,omitempty" binding:"required,numeric"`
-	CategoryId int            `db:"category_id" json:"category_id,omitempty" binding:"required,min=1"`
+	Cost       float32        `json:"cost,omitempty" binding:"required,numeric"`
+	Type       *int8          `json:"type,omitempty" binding:"required,gte=0,lte=1"`
+	Remark     string         `json:"remark,omitempty" binding:"required,max=200"`
+	RecordTime timex.JsonTime `json:"record_time" binding:"required"`
+	AssetId    int            `json:"asset_id,omitempty" binding:"required,numeric"`
+	CategoryId int            `json:"category_id,omitempty" binding:"required,min=1"`
 }
 
 func (b *BillController) Add(c *gin.Context) {
@@ -36,7 +36,7 @@ func (b *BillController) Add(c *gin.Context) {
 		Type:       req.Type,
 		Remark:     req.Remark,
 		RecordTime: req.RecordTime.Timestamp(),
-		AccountId:  req.AccountId,
+		AssetId:    req.AssetId,
 		CategoryId: req.CategoryId,
 		BookId:     bookId,
 		UserId:     userId,

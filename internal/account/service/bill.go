@@ -33,6 +33,7 @@ type billService struct {
 	categoryStore store.CategoryStore
 	bookStore     store.BookStore
 	userStore     store.UserStore
+	assetStore    store.AssetStore
 }
 
 func NewBillSrv() BillSrv {
@@ -40,6 +41,8 @@ func NewBillSrv() BillSrv {
 		billStore:     store.NewBillStore(),
 		categoryStore: store.NewCategoryStore(),
 		bookStore:     store.NewBookStore(),
+		userStore:     store.NewUserStore(),
+		assetStore:    store.NewAssetStore(),
 	}
 }
 
@@ -107,8 +110,12 @@ func (b *billService) Delete(ctx context.Context, billId, userId, bookId int) er
 		if err != nil {
 			return err
 		}
-
-		// todo 指定账户减去金额
+		// 指定账户加上金额
+		if bill.AssetId > 0 {
+			if err := b.assetStore.ModifyBalance(ctx, bill.AssetId, bill.Cost); err != nil {
+				return err
+			}
+		}
 		return nil
 	})
 }
@@ -142,7 +149,12 @@ func (b *billService) save(ctx context.Context, bill *model.Bill) error {
 		}
 	}
 
-	// todo 校验账户是否存在
+	// 校验账户是否存在
+	if bill.AssetId > 0 {
+		if _, err := b.checkAsset(ctx, bill.AssetId, bill.UserId); err != nil {
+			return err
+		}
+	}
 
 	user, err := b.userStore.GetById(ctx, bill.UserId)
 	if err != nil {
@@ -154,29 +166,34 @@ func (b *billService) save(ctx context.Context, bill *model.Bill) error {
 	bill.CreateTime = now
 	bill.UpdateTime = now
 
-	return WithTransaction(ctx, func(ctx context.Context) (err error) {
+	return WithTransaction(ctx, func(ctx context.Context) error {
 		// 需要向账户加/减的金额
-		// var diff float32 = 0
+		var diff float32 = 0
 
 		if bill.Id > 0 {
 			// 查询更新之前的记录，用于计算差值
-			// billBefore, err := b.queryBillById(ctx, bill.Id)
-			// if err != nil {
-			// 	return
-			// }
-			// diff = billBefore.Cost - bill.Cost
+			billBefore, err := b.queryBillById(ctx, bill.Id)
+			if err != nil {
+				return err
+			}
+			diff = billBefore.Cost - bill.Cost
 			// 更新账单
 			err = b.billStore.Update(ctx, bill)
 		} else {
 			// 插入账单
 			err = b.billStore.Add(ctx, bill)
-			// diff = bill.Cost
+			diff = -bill.Cost
 		}
 		if err != nil {
-			return
+			return err
 		}
 
-		// todo 账户加减指定金额
+		// 账户加减指定金额
+		if bill.AssetId > 0 {
+			if err := b.assetStore.ModifyBalance(ctx, bill.AssetId, diff); err != nil {
+				return err
+			}
+		}
 
 		return nil
 	})
@@ -238,4 +255,21 @@ func (b *billService) checkUserInBook(ctx context.Context, bookId, userId int) e
 
 	log.Errorf("用户 %d 不是账本 %d 的成员", userId, bookId)
 	return errno.New(errno.ErrIllegalOperate)
+}
+
+func (b *billService) checkAsset(ctx context.Context, assetId, userId int) (*model.Asset, error) {
+	asset, err := b.assetStore.QueryById(ctx, assetId)
+	if err != nil {
+		return nil, err
+	}
+
+	if asset == nil {
+		return nil, errno.New(errno.ErrAssetNotFound)
+	}
+
+	if asset.UserId != userId {
+		return nil, errno.New(errno.ErrIllegalOperate)
+	}
+
+	return asset, nil
 }

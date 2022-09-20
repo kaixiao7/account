@@ -33,7 +33,7 @@ func (b *BillController) Update(c *gin.Context) {
 		Type:       req.Type,
 		Remark:     req.Remark,
 		RecordTime: req.RecordTime.Timestamp(),
-		AccountId:  req.AccountId,
+		AssetId:    req.AssetId,
 		CategoryId: req.CategoryId,
 		BookId:     bookId,
 		UserId:     userId,
