@@ -1,5 +1,9 @@
 package model
 
+import (
+	"kaixiao7/account/internal/pkg/timex"
+)
+
 type Bill struct {
 	Id         int     `db:"id" json:"id,omitempty"`
 	Cost       float32 `db:"cost" json:"cost,omitempty" binding:"required,numeric"`
@@ -18,4 +22,11 @@ type Bill struct {
 type BillTag struct {
 	CategoryId int    `db:"category_id" json:"category_id"`
 	Remark     string `db:"remark" json:"tag"`
+}
+
+type DayBill struct {
+	Date    timex.JsonTime `json:"date"`
+	Income  float32        `json:"income,omitempty"`
+	Expense float32        `json:"expense,omitempty"`
+	Bills   []Bill         `json:"bills,omitempty"`
 }

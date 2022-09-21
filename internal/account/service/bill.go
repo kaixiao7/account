@@ -6,6 +6,7 @@ import (
 
 	"kaixiao7/account/internal/account/model"
 	"kaixiao7/account/internal/account/store"
+	"kaixiao7/account/internal/pkg/constant"
 	"kaixiao7/account/internal/pkg/errno"
 	"kaixiao7/account/internal/pkg/log"
 	"kaixiao7/account/internal/pkg/timex"
@@ -22,7 +23,7 @@ type BillSrv interface {
 	Delete(ctx context.Context, billId, userId, bookId int) error
 
 	// QueryByTime 查询账本在指定月份的账单
-	QueryByTime(ctx context.Context, bookId, userId int, date time.Time) ([]model.Bill, error)
+	QueryByTime(ctx context.Context, bookId, userId int, date time.Time) ([]model.DayBill, error)
 
 	// QueryTag 查询账单标签/备注
 	QueryTag(ctx context.Context, bookId, userId int) ([]model.BillTag, error)
@@ -47,7 +48,7 @@ func NewBillSrv() BillSrv {
 }
 
 // QueryByTime 查询账本在指定月份的账单
-func (b *billService) QueryByTime(ctx context.Context, bookId, userId int, date time.Time) ([]model.Bill, error) {
+func (b *billService) QueryByTime(ctx context.Context, bookId, userId int, date time.Time) ([]model.DayBill, error) {
 	// 校验账本是否存在
 	book, err := b.checkBook(ctx, bookId)
 	if err != nil {
@@ -67,7 +68,44 @@ func (b *billService) QueryByTime(ctx context.Context, bookId, userId int, date 
 	begin := timex.GetFirstDateOfMonth(date)
 	end := timex.GetLastDateOfMonth(date)
 
-	return b.billStore.QueryByTime(ctx, bookId, begin.Unix(), end.Unix())
+	bills, err := b.billStore.QueryByTime(ctx, bookId, begin.Unix(), end.Unix())
+	if err != nil {
+		return nil, err
+	}
+	if bills == nil {
+		return nil, nil
+	}
+
+	// 日统计
+	diffDays := int(end.Sub(begin).Hours() / 24)
+	var dayBills []model.DayBill
+
+	for i := diffDays - 1; i >= 0; i-- {
+		start := begin.AddDate(0, 0, i)
+		startTs := start.Unix()
+		endTs := begin.AddDate(0, 0, i+1).Unix()
+		var dayBill []model.Bill
+		var income float32
+		var expense float32
+		for _, bill := range bills {
+			if bill.RecordTime >= startTs && bill.RecordTime < endTs {
+				if *bill.Type == constant.AssetTypeIncome {
+					income = income + bill.Cost
+				} else {
+					expense = expense + bill.Cost
+				}
+				dayBill = append(dayBill, bill)
+			}
+		}
+
+		dayBills = append(dayBills, model.DayBill{
+			Date:    timex.JsonTime(start),
+			Income:  income,
+			Expense: expense,
+			Bills:   dayBill,
+		})
+	}
+	return dayBills, nil
 }
 
 // QueryTag 查询账单标签/备注
