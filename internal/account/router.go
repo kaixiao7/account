@@ -8,6 +8,7 @@ import (
 	"kaixiao7/account/internal/account/controller/borrow"
 	"kaixiao7/account/internal/account/controller/budget"
 	"kaixiao7/account/internal/account/controller/category"
+	"kaixiao7/account/internal/account/controller/statistic"
 	"kaixiao7/account/internal/account/controller/tag"
 	"kaixiao7/account/internal/account/controller/user"
 	"kaixiao7/account/internal/pkg/core"
@@ -116,5 +117,13 @@ func installController(g *gin.Engine) {
 		borrows.POST("/:assetFlowId/flows", borrowController.AddFlow)
 		borrows.PUT("/:assetFlowId/flows/:flowId", borrowController.UpdateFlow)
 		borrows.DELETE("/:assetFlowId/flows/:flowId", borrowController.DeleteFlow)
+	}
+
+	statistics := g.Group("/statistics")
+	{
+		statisticController := statistic.NewStatisticController()
+
+		statistics.GET("", statisticController.List)
+
 	}
 }
