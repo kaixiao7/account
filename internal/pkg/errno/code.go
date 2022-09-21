@@ -30,4 +30,6 @@ var (
 
 	ErrAssetFlowNotFound     = &Errno{Code: 10601, Message: "流水不存在"}
 	ErrAssetFlowAssociateNil = &Errno{Code: 10602, Message: "对方名称不能为空"}
+
+	ErrBorrowFlowNotFound = &Errno{Code: 10701, Message: "流水不存在"}
 )

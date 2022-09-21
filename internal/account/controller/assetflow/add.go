@@ -11,12 +11,15 @@ import (
 )
 
 type assetFlowReq struct {
-	AssetId int `db:"asset_id" json:"asset_id"  binding:"required,numeric"`
 	assetFlowUpdateReq
 }
 
 func (af *AssetFlowController) Add(c *gin.Context) {
 	userId := controller.GetUserId(c)
+	assetId, ok := controller.GetIntParamFromUrl(c, "assetId")
+	if !ok {
+		return
+	}
 
 	var assetFlowReq assetFlowReq
 	if err := c.ShouldBindJSON(&assetFlowReq); err != nil {
@@ -26,7 +29,7 @@ func (af *AssetFlowController) Add(c *gin.Context) {
 
 	assetFlow := model.AssetFlow{
 		UserId:        userId,
-		AssetId:       assetFlowReq.AssetId,
+		AssetId:       assetId,
 		Type:          assetFlowReq.Type,
 		Cost:          assetFlowReq.Cost,
 		RecordTime:    assetFlowReq.RecordTime.Timestamp(),
