@@ -5,6 +5,7 @@ import (
 	"kaixiao7/account/internal/account/controller/assetflow"
 	"kaixiao7/account/internal/account/controller/bill"
 	"kaixiao7/account/internal/account/controller/book"
+	"kaixiao7/account/internal/account/controller/borrow"
 	"kaixiao7/account/internal/account/controller/budget"
 	"kaixiao7/account/internal/account/controller/category"
 	"kaixiao7/account/internal/account/controller/tag"
@@ -102,5 +103,18 @@ func installController(g *gin.Engine) {
 		assetFlows.POST("", assetFlowController.Add)
 		assetFlows.PUT(":assetFlowId", assetFlowController.Update)
 		assetFlows.DELETE(":assetFlowId", assetFlowController.Delete)
+	}
+
+	borrows := g.Group("/borrows")
+	{
+		borrowController := borrow.NewBorrowController()
+
+		borrows.GET("", borrowController.List)
+		borrows.GET("/total", borrowController.Total)
+
+		borrows.GET("/:assetFlowId/flows", borrowController.FlowList)
+		borrows.POST("/:assetFlowId/flows", borrowController.AddFlow)
+		borrows.PUT("/:assetFlowId/flows/:flowId", borrowController.UpdateFlow)
+		borrows.DELETE("/:assetFlowId/flows/:flowId", borrowController.DeleteFlow)
 	}
 }
