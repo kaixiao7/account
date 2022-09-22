@@ -87,7 +87,7 @@ func (b *bill) Delete(ctx context.Context, billId int) error {
 func (b *bill) QueryByTime(ctx context.Context, bookId int, beginTime int64, endTime int64) ([]model.Bill, error) {
 	db := getDBFromContext(ctx)
 
-	sql := "select * from bill where book_id = ? and record_time >= ? and record_time <= ?"
+	sql := "select * from bill where book_id = ? and record_time >= ? and record_time <= ? order by record_time desc"
 
 	var bills = []model.Bill{}
 	err := db.Select(&bills, sql, bookId, beginTime, endTime)
