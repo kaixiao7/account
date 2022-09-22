@@ -43,7 +43,7 @@ func (jt *JsonTime) parse(b []byte, pattern string) error {
 		return nil
 	}
 
-	parseTime, err := time.Parse(`"`+pattern+`"`, data)
+	parseTime, err := time.ParseInLocation(`"`+pattern+`"`, data, time.Local)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func GetFirstDateOfMonth(d time.Time) time.Time {
 	return getZeroTime(t)
 }
 
-// GetLastDateOfMonth 获取指定日志所在月的最后一天的零点
+// GetLastDateOfMonth 获取指定日期所在月的最后一天的零点
 func GetLastDateOfMonth(d time.Time) time.Time {
 	return GetFirstDateOfMonth(d).AddDate(0, 1, -1)
 }

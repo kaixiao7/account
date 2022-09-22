@@ -67,6 +67,7 @@ func (b *billService) QueryByTime(ctx context.Context, bookId, userId int, date 
 
 	begin := timex.GetFirstDateOfMonth(date)
 	end := timex.GetLastDateOfMonth(date)
+	end = end.Add(time.Hour * 24)
 
 	bills, err := b.billStore.QueryByTime(ctx, bookId, begin.Unix(), end.Unix())
 	if err != nil {
