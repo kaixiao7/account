@@ -1,8 +1,9 @@
 run_mod: debug
 port: :8080
 jwt:
-  secret: RtgYsliaukijq8s2l9p3a4UQBb7
-  expire: 2
+  secret: RtgYsliaukijq8s2l9p3a4UQBb7 # jwt签名密钥
+  expire: 2                           # token过期时间，单位：小时
+  refresh-token: 7                    # refreshToken过期时间，单位：天
 
 log:
   level: debug
@@ -11,7 +12,7 @@ log:
   enable-stdout: true
 
 db:
-  file: ./account.db  # sqlite数据库文件的位置
-  max-idle-connections: 10 # 最大空闲连接数
-  max-open-connections: 10 # 最大打开连接数
-  max-connection-life-time: 30 # 空闲连接最大存活时间 30s
+  file: ./account.db            # sqlite数据库文件的位置
+  max-idle-connections: 10      # 最大空闲连接数
+  max-open-connections: 10      # 最大打开连接数
+  max-connection-life-time: 30  # 空闲连接最大存活时间 30s
