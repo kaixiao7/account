@@ -47,12 +47,16 @@ func Parse(tokenStr string) (int, error) {
 }
 
 // Sign 生成jwt令牌
-func Sign(identity int) (string, error) {
+func Sign(identity, expire int) (string, error) {
+	if expire <= 0 {
+		expire = cfg.expire
+	}
+
 	claims := jwt.MapClaims{
 		cfg.identityKey: strconv.Itoa(identity),
-		"nbf":           time.Now().Unix(),                                            // 生效时间
-		"iat":           time.Now().Unix(),                                            // 签发时间
-		"exp":           time.Now().Add(time.Duration(cfg.expire) * time.Hour).Unix(), // 过期时间
+		"nbf":           time.Now().Unix(),                                        // 生效时间
+		"iat":           time.Now().Unix(),                                        // 签发时间
+		"exp":           time.Now().Add(time.Duration(expire) * time.Hour).Unix(), // 过期时间
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -60,13 +64,10 @@ func Sign(identity int) (string, error) {
 	return token.SignedString([]byte(cfg.secret))
 }
 
-func Init(secret string, expire int) {
+func Init(secret string) {
 	once.Do(func() {
 		if secret != "" {
 			cfg.secret = secret
-		}
-		if expire > 0 {
-			cfg.expire = expire
 		}
 	})
 }

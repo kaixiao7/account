@@ -4,13 +4,13 @@ import (
 	"kaixiao7/account/internal/pkg/auth"
 	"kaixiao7/account/internal/pkg/core"
 	"kaixiao7/account/internal/pkg/errno"
-	"kaixiao7/account/internal/pkg/token"
 
 	"github.com/gin-gonic/gin"
 )
 
-type LoginResponse struct {
-	Token string `json:"token"`
+type Tokens struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type LoginRequest struct {
@@ -42,11 +42,11 @@ func (u *UserController) Login(c *gin.Context) {
 	}
 
 	// 登录成功，发送token
-	t, err := token.Sign(user.Id)
+	resp, err := generateTokens(user.Id)
 	if err != nil {
-		core.WriteRespErr(c, errno.NewWithError(errno.ErrToken, err))
+		core.WriteRespErr(c, err)
 		return
 	}
 
-	core.WriteRespSuccess(c, LoginResponse{Token: t})
+	core.WriteRespSuccess(c, resp)
 }
