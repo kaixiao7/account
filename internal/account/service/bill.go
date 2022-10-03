@@ -73,8 +73,8 @@ func (b *billService) QueryByTime(ctx context.Context, bookId, userId int, date 
 	if err != nil {
 		return nil, err
 	}
-	if bills == nil {
-		return nil, nil
+	if len(bills) == 0 {
+		return []model.DayBill{}, nil
 	}
 
 	// 日统计
@@ -97,6 +97,10 @@ func (b *billService) QueryByTime(ctx context.Context, bookId, userId int, date 
 				}
 				dayBill = append(dayBill, bill)
 			}
+		}
+
+		if dayBill == nil {
+			continue
 		}
 
 		dayBills = append(dayBills, model.DayBill{
