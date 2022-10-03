@@ -12,7 +12,7 @@ import (
 type BudgetStore interface {
 	AddBudget(ctx context.Context, budget *model.Budget) error
 	QueryBudget(ctx context.Context, bookId int) (*model.Budget, error)
-	UpdateBudget(ctx context.Context, budgetId int, budget float32, updateTime int64) error
+	UpdateBudget(ctx context.Context, budgetId int, budget float64, updateTime int64) error
 }
 
 type budget struct {
@@ -36,7 +36,7 @@ func (b *budget) AddBudget(ctx context.Context, budget *model.Budget) error {
 }
 
 // UpdateBudget 更新账本预算
-func (b *budget) UpdateBudget(ctx context.Context, budgetId int, budget float32, updateTime int64) error {
+func (b *budget) UpdateBudget(ctx context.Context, budgetId int, budget float64, updateTime int64) error {
 	db := getDBFromContext(ctx)
 	sql := "update budget_setting set budget=?, update_time=? where id = ?"
 

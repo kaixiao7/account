@@ -6,7 +6,7 @@ import (
 
 type Bill struct {
 	Id         int     `db:"id" json:"id,omitempty"`
-	Cost       float32 `db:"cost" json:"cost,omitempty" binding:"required,numeric"`
+	Cost       float64 `db:"cost" json:"cost,omitempty" binding:"required,numeric"`
 	Type       *int8   `db:"type" json:"type,omitempty" binding:"required,gte=0,lte=1"`
 	Remark     string  `db:"remark" json:"remark,omitempty" binding:"required,max=200"`
 	RecordTime int64   `db:"record_time" json:"record_time" binding:"required"`
@@ -26,7 +26,7 @@ type BillTag struct {
 
 type DayBill struct {
 	Date    timex.JsonTime `json:"date"`
-	Income  float32        `json:"income,omitempty"`
-	Expense float32        `json:"expense,omitempty"`
+	Income  float64        `json:"income,omitempty"`
+	Expense float64        `json:"expense,omitempty"`
 	Bills   []Bill         `json:"bills,omitempty"`
 }

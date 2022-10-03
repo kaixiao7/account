@@ -86,8 +86,8 @@ func (b *billService) QueryByTime(ctx context.Context, bookId, userId int, date 
 		startTs := start.Unix()
 		endTs := begin.AddDate(0, 0, i+1).Unix()
 		var dayBill []model.Bill
-		var income float32
-		var expense float32
+		var income float64
+		var expense float64
 		for _, bill := range bills {
 			if bill.RecordTime >= startTs && bill.RecordTime < endTs {
 				if *bill.Type == constant.AssetTypeIncome {
@@ -211,7 +211,7 @@ func (b *billService) save(ctx context.Context, bill *model.Bill) error {
 
 	return WithTransaction(ctx, func(ctx context.Context) error {
 		// 需要向账户加/减的金额
-		var diff float32 = 0
+		var diff float64 = 0
 
 		if bill.Id > 0 {
 			// 查询更新之前的记录，用于计算差值

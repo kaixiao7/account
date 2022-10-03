@@ -9,7 +9,7 @@ import (
 )
 
 type BudgetSrv interface {
-	SetBudget(ctx context.Context, budgetId, userId int, budget float32) error
+	SetBudget(ctx context.Context, budgetId, userId int, budget float64) error
 	QueryBudget(ctx context.Context, bookId int) (*model.Budget, error)
 }
 
@@ -22,7 +22,7 @@ func NewBudgetSrv() BudgetSrv {
 }
 
 // SetBudget 设置账本预算
-func (b *budgetService) SetBudget(ctx context.Context, budgetId, userId int, budget float32) error {
+func (b *budgetService) SetBudget(ctx context.Context, budgetId, userId int, budget float64) error {
 	return b.budgetStore.UpdateBudget(ctx, budgetId, budget, time.Now().Unix())
 }
 

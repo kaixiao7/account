@@ -10,7 +10,7 @@ import (
 )
 
 type billReq struct {
-	Cost       float32        `json:"cost,omitempty" binding:"required,numeric"`
+	Cost       float64        `json:"cost,omitempty" binding:"required,numeric"`
 	Type       *int8          `json:"type,omitempty" binding:"required,gte=0,lte=1"`
 	Remark     string         `json:"remark,omitempty" binding:"required,max=200"`
 	RecordTime timex.JsonTime `json:"record_time" binding:"required"`

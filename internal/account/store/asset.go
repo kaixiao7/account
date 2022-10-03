@@ -26,7 +26,7 @@ type AssetStore interface {
 	QueryById(ctx context.Context, id int) (*model.Asset, error)
 
 	// ModifyBalance 修改账户余额
-	ModifyBalance(ctx context.Context, id int, diff float32) error
+	ModifyBalance(ctx context.Context, id int, diff float64) error
 }
 
 type asset struct {
@@ -115,7 +115,7 @@ func (a *asset) QueryById(ctx context.Context, id int) (*model.Asset, error) {
 }
 
 // ModifyBalance 修改账户余额
-func (a *asset) ModifyBalance(ctx context.Context, id int, diff float32) error {
+func (a *asset) ModifyBalance(ctx context.Context, id int, diff float64) error {
 	db := getDBFromContext(ctx)
 	sql := "update asset_account set balance = balance + ? where id = ?"
 
