@@ -13,7 +13,7 @@ import (
 
 type assetFlowUpdateReq struct {
 	Type          int            `db:"type" json:"type"  binding:"required,numeric"`
-	Cost          float32        `db:"cost" json:"cost"  binding:"required,numeric"`
+	Cost          float64        `db:"cost" json:"cost"  binding:"required,numeric"`
 	RecordTime    timex.JsonTime `db:"record_time" json:"record_time"  binding:"required"`
 	Remark        string         `db:"remark" json:"remark,omitempty"`
 	CategoryId    int            `db:"category_id" json:"category_id,omitempty"`

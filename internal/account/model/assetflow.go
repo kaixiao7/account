@@ -5,7 +5,7 @@ type AssetFlow struct {
 	UserId        int     `db:"user_id" json:"user_id,omitempty"`
 	AssetId       int     `db:"asset_id" json:"asset_id"`
 	Type          int     `db:"type" json:"type"`
-	Cost          float32 `db:"cost" json:"cost"`
+	Cost          float64 `db:"cost" json:"cost"`
 	RecordTime    int64   `db:"record_time" json:"record_time"`
 	Del           int     `db:"del" json:"-"`
 	Remark        string  `db:"remark" json:"remark,omitempty"`
@@ -22,7 +22,7 @@ type AssetFlowVO struct {
 	UserId        int     `db:"user_id" json:"user_id,omitempty"`
 	AssetId       int     `db:"asset_id" json:"asset_id"`
 	Type          int     `db:"type" json:"type"`
-	Cost          float32 `db:"cost" json:"cost"`
+	Cost          float64 `db:"cost" json:"cost"`
 	RecordTime    int64   `db:"record_time" json:"record_time"`
 	Remark        string  `db:"remark" json:"remark,omitempty"`
 	CategoryId    int     `db:"category_id" json:"category_id,omitempty"`

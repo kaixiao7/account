@@ -2,7 +2,7 @@ package model
 
 type Budget struct {
 	Id         int     `db:"id" json:"id"`
-	Budget     float32 `db:"budget" json:"budget"`
+	Budget     float64 `db:"budget" json:"budget"`
 	BookId     int     `db:"book_id" json:"book_id"`
 	Type       int     `db:"type" json:"type"`
 	CategoryId int     `db:"category_id" json:"category_id"`

@@ -11,7 +11,7 @@ import (
 )
 
 type budgetRequest struct {
-	Budget float32 `json:"budget"`
+	Budget float64 `json:"budget"`
 }
 
 // Put 更新账本预算

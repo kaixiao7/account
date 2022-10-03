@@ -11,7 +11,7 @@ import (
 
 type addFlowReq struct {
 	AssetId    int            `json:"asset_id" binding:"required,numeric"`
-	Cost       float32        `json:"cost" binding:"required,numeric"`
+	Cost       float64        `json:"cost" binding:"required,numeric"`
 	RecordTime timex.JsonTime `json:"record_time" binding:"required"`
 	Type       int            `json:"type,omitempty" binding:"required,numeric"`
 	Remark     string         `json:"remark,omitempty"`

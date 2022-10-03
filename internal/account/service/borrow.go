@@ -49,8 +49,8 @@ func (b *borrowService) QueryTotal(ctx context.Context, userId int) (*model.Borr
 	if err != nil {
 		return nil, err
 	}
-	var borrowIn float32
-	var borrowOut float32
+	var borrowIn float64
+	var borrowOut float64
 	for _, flow := range borrowInFlows {
 		borrowIn = borrowIn + flow.Cost
 	}
