@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// FlowList 查询借入借出流水列表
 func (b *BorrowController) FlowList(c *gin.Context) {
 	userId := controller.GetUserId(c)
 

@@ -9,6 +9,9 @@ import (
 
 type CategorySrv interface {
 	QueryAll(ctx context.Context, bookId int) ([]model.Category, error)
+
+	// QueryByUserId 根据用户id查询其所有分类
+	QueryByUserId(ctx context.Context, userId int) ([]model.Category, error)
 }
 
 type categoryService struct {
@@ -24,4 +27,9 @@ func NewCategorySrv() CategorySrv {
 // QueryAll 查询账本下的所有分类
 func (c *categoryService) QueryAll(ctx context.Context, bookId int) ([]model.Category, error) {
 	return c.categoryStore.QueryAll(ctx, bookId)
+}
+
+// QueryByUserId 根据用户id查询其所有分类
+func (c *categoryService) QueryByUserId(ctx context.Context, userId int) ([]model.Category, error) {
+	return c.categoryStore.QueryByUserId(ctx, userId)
 }

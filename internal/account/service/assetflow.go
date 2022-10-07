@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"kaixiao7/account/internal/account/model"
@@ -27,10 +28,15 @@ type AssetFlowSrv interface {
 	QueryByAssetId(ctx context.Context, assetId, userId int) ([]model.AssetFlow, error)
 	// QueryByAssetIdAndTime 根据资产id查询时间范围内的流水和账单
 	QueryByAssetIdAndTime(ctx context.Context, assetId, userId int, date time.Time) ([]model.AssetFlowVO, error)
+
 	// QueryBorrowIn 查询借入记录
-	QueryBorrowIn(ctx context.Context, userId int) ([]model.AssetFlow, error)
-	// QueryBorrowOut 查询借出记录
-	QueryBorrowOut(ctx context.Context, userId int) ([]model.AssetFlow, error)
+	// QueryBorrowIn(ctx context.Context, userId int) ([]model.AssetFlow, error)
+	// // QueryBorrowOut 查询借出记录
+	// QueryBorrowOut(ctx context.Context, userId int) ([]model.AssetFlow, error)
+	// // QueryBorrowFlowIn 查询借入流水
+	// QueryBorrowFlowIn(ctx context.Context, userId int) ([]model.AssetFlow, error)
+	// // QueryBorrowFlowOut 查询借出流水
+	// QueryBorrowFlowOut(ctx context.Context, userId int) ([]model.AssetFlow, error)
 }
 
 type assertFlowService struct {
@@ -55,8 +61,9 @@ func (af *assertFlowService) Add(ctx context.Context, assetFlow *model.AssetFlow
 
 	return WithTransaction(ctx, func(ctx context.Context) error {
 		diff := assetFlow.Cost
-		// 转出、借出 将金额变为负数
-		if assetFlow.Type == constant.AssetTypeTransferOut || assetFlow.Type == constant.AssetTypeBorrowOut {
+		// 转出、借出、还款 将金额变为负数，因为修改账户余额中的sql计算方式为加法
+		if assetFlow.Type == constant.AssetTypeTransferOut || assetFlow.Type == constant.AssetTypeBorrowOut ||
+			assetFlow.Type == constant.AssetTypeStill {
 			diff = -diff
 		}
 		// 修改账户余额
@@ -81,6 +88,7 @@ func (af *assertFlowService) Add(ctx context.Context, assetFlow *model.AssetFlow
 
 // Update 修改流水
 // 仅修改基本信息，不会修改类型及账户
+// 其实流水不应该被修改，只能增加、删除
 func (af *assertFlowService) Update(ctx context.Context, assetFlow *model.AssetFlow) error {
 	// 仅修改基本信息，不会修改类型及账户
 	assetFlowBefore, err := af.checkAssetFlow(ctx, assetFlow.Id, assetFlow.UserId)
@@ -99,8 +107,9 @@ func (af *assertFlowService) Update(ctx context.Context, assetFlow *model.AssetF
 	// 前后差值
 	diff := assetFlowBefore.Cost - assetFlow.Cost
 	return WithTransaction(ctx, func(ctx context.Context) error {
-		// 转入、借入 将金额变为负数
-		if assetFlow.Type == constant.AssetTypeTransferIn || assetFlow.Type == constant.AssetTypeBorrowIn {
+		// 转入、借入、收款 将金额变为负数
+		if assetFlow.Type == constant.AssetTypeTransferIn || assetFlow.Type == constant.AssetTypeBorrowIn ||
+			assetFlow.Type == constant.AssetTypeHarvest {
 			diff = -diff
 		}
 		// 修改账户金额
@@ -150,11 +159,12 @@ func (af *assertFlowService) Delete(ctx context.Context, assertFlowId, userId in
 	}
 
 	return WithTransaction(ctx, func(ctx context.Context) error {
+		// 账户金额恢复
 		if err := af.moneyRegain(ctx, assetFlow); err != nil {
 			return err
 		}
 
-		// 删除记录
+		// 删除流水记录
 		if err := af.assetFlowStore.Delete(ctx, assertFlowId); err != nil {
 			return err
 		}
@@ -196,9 +206,7 @@ func (af *assertFlowService) transferReverse(ctx context.Context, assetFlow mode
 
 	if assetFlow.Type == constant.AssetTypeTransferOut {
 		assetFlow.Type = constant.AssetTypeTransferIn
-	}
-
-	if assetFlow.Type == constant.AssetTypeTransferIn {
+	} else if assetFlow.Type == constant.AssetTypeTransferIn {
 		assetFlow.Type = constant.AssetTypeTransferOut
 		diff = -diff
 	}
@@ -238,8 +246,9 @@ func (af *assertFlowService) transferReverseQuery(ctx context.Context, assetFlow
 // 账户余额恢复
 func (af *assertFlowService) moneyRegain(ctx context.Context, assetFlow *model.AssetFlow) error {
 	cost := assetFlow.Cost
-	// 转入、借入 将金额变为负数
-	if assetFlow.Type == constant.AssetTypeTransferIn || assetFlow.Type == constant.AssetTypeBorrowIn {
+	// 转入、借入、收款 将金额变为负数
+	if assetFlow.Type == constant.AssetTypeTransferIn || assetFlow.Type == constant.AssetTypeBorrowIn ||
+		assetFlow.Type == constant.AssetTypeHarvest {
 		cost = -cost
 	}
 	// 账户余额恢复
@@ -299,6 +308,9 @@ func (af *assertFlowService) saveCheck(ctx context.Context, assetFlow *model.Ass
 
 	// 转入、转出校验目标账户
 	if assetFlow.Type == constant.AssetTypeTransferIn || assetFlow.Type == constant.AssetTypeTransferOut {
+		if assetFlow.AssetId == *assetFlow.TargetAssetId {
+			return errno.New(errno.ErrIllegalOperate)
+		}
 		_, err = af.checkAsset(ctx, *assetFlow.TargetAssetId, assetFlow.UserId)
 		if err != nil {
 			return err
@@ -349,25 +361,41 @@ func (af *assertFlowService) QueryByAssetIdAndTime(ctx context.Context, assetId,
 
 	ret = append(ret, model.AssetFlow2VO(flows)...)
 
+	// 查询账户下的账单记录
 	bills, err := af.billStore.QueryByAssetIdAndTime(ctx, assetId, begin.Unix(), end.Unix())
 	if err != nil {
 		return nil, err
 	}
 	ret = append(ret, model.Bill2VO(bills)...)
 
+	// 根据记录时间倒序排序
+	sort.Slice(ret, func(i, j int) bool {
+		return ret[i].RecordTime > ret[j].RecordTime
+	})
+
 	return ret, nil
 }
 
 // QueryBorrowIn 查询借入记录
-func (af *assertFlowService) QueryBorrowIn(ctx context.Context, userId int) ([]model.AssetFlow, error) {
-	return af.queryBorrow(ctx, userId, constant.AssetTypeBorrowIn)
-}
-
-// QueryBorrowOut 查询借出记录
-func (af *assertFlowService) QueryBorrowOut(ctx context.Context, userId int) ([]model.AssetFlow, error) {
-	return af.queryBorrow(ctx, userId, constant.AssetTypeBorrowOut)
-}
-
-func (af *assertFlowService) queryBorrow(ctx context.Context, userId, borrowType int) ([]model.AssetFlow, error) {
-	return af.assetFlowStore.QueryByUserIdAndType(ctx, userId, borrowType)
-}
+// func (af *assertFlowService) QueryBorrowIn(ctx context.Context, userId int) ([]model.AssetFlow, error) {
+// 	return af.queryBorrow(ctx, userId, constant.AssetTypeBorrowIn)
+// }
+//
+// // QueryBorrowOut 查询借出记录
+// func (af *assertFlowService) QueryBorrowOut(ctx context.Context, userId int) ([]model.AssetFlow, error) {
+// 	return af.queryBorrow(ctx, userId, constant.AssetTypeBorrowOut)
+// }
+//
+// // QueryBorrowFlowIn 查询借入流水
+// func (af *assertFlowService) QueryBorrowFlowIn(ctx context.Context, userId int) ([]model.AssetFlow, error) {
+// 	return af.queryBorrow(ctx, userId, constant.AssetTypeStill)
+// }
+//
+// // QueryBorrowFlowOut 查询借出流水
+// func (af *assertFlowService) QueryBorrowFlowOut(ctx context.Context, userId int) ([]model.AssetFlow, error) {
+// 	return af.queryBorrow(ctx, userId, constant.AssetTypeHarvest)
+// }
+//
+// func (af *assertFlowService) queryBorrow(ctx context.Context, userId, borrowType int) ([]model.AssetFlow, error) {
+// 	return af.assetFlowStore.QueryByUserIdAndType(ctx, userId, borrowType)
+// }

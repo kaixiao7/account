@@ -46,7 +46,6 @@ func (af *AssetFlowController) Update(c *gin.Context) {
 		Cost:          assetFlowReq.Cost,
 		RecordTime:    assetFlowReq.RecordTime.Timestamp(),
 		Remark:        assetFlowReq.Remark,
-		CategoryId:    &assetFlowReq.CategoryId,
 		TargetAssetId: &assetFlowReq.TargetAssetId,
 		AssociateName: assetFlowReq.AssociateName,
 		CreateTime:    time.Now().Unix(),

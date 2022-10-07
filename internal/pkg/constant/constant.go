@@ -38,4 +38,10 @@ const (
 
 	// AssetTypeModify 资产类型 修改余额
 	AssetTypeModify
+
+	// AssetTypeStill 资产类型 还款
+	AssetTypeStill
+
+	// AssetTypeHarvest 资产类型 收款
+	AssetTypeHarvest
 )

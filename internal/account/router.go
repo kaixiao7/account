@@ -66,6 +66,8 @@ func installController(g *gin.Engine) {
 		categoryController := category.NewCategoryController()
 
 		categories.GET("", categoryController.List)
+
+		g.GET("/categories", categoryController.ListUser)
 	}
 
 	bills := g.Group("/books/:bookId/bills")
@@ -103,7 +105,7 @@ func installController(g *gin.Engine) {
 
 		assetFlows.GET("", assetFlowController.List)
 		assetFlows.POST("", assetFlowController.Add)
-		assetFlows.PUT(":assetFlowId", assetFlowController.Update)
+		// assetFlows.PUT(":assetFlowId", assetFlowController.Update)
 		assetFlows.DELETE(":assetFlowId", assetFlowController.Delete)
 	}
 
@@ -116,7 +118,7 @@ func installController(g *gin.Engine) {
 
 		borrows.GET("/:assetFlowId/flows", borrowController.FlowList)
 		borrows.POST("/:assetFlowId/flows", borrowController.AddFlow)
-		borrows.PUT("/:assetFlowId/flows/:flowId", borrowController.UpdateFlow)
+		// borrows.PUT("/:assetFlowId/flows/:flowId", borrowController.UpdateFlow)
 		borrows.DELETE("/:assetFlowId/flows/:flowId", borrowController.DeleteFlow)
 	}
 
