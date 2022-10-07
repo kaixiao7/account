@@ -60,7 +60,7 @@ func (a *assetService) Update(ctx context.Context, asset *model.Asset) error {
 		}
 
 		// 资产账户金额不等，则需要添加一条流水
-		diff := assetBefore.Balance - asset.Balance
+		diff := asset.Balance - assetBefore.Balance
 		if diff != 0 {
 			assetFlow := model.AssetFlow{
 				UserId:     asset.UserId,

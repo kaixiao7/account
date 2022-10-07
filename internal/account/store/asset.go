@@ -40,7 +40,7 @@ func NewAssetStore() AssetStore {
 func (a *asset) Add(ctx context.Context, asset *model.Asset) error {
 	db := getDBFromContext(ctx)
 
-	sql := "insert into asset_account(user_id, asset_type, asset_name, balance, init, icon, is_total, remark, create_time, update_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	sql := "insert into asset_account(user_id, asset_type, asset_name, balance, init, icon, is_total, remark, create_time, update_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	_, err := db.Exec(sql, asset.UserId, asset.AssetType, asset.AssetName, asset.Balance, asset.Init, asset.Icon,
 		asset.IsTotal, asset.Remark, asset.CreateTime, asset.UpdateTime)
 	if err != nil {

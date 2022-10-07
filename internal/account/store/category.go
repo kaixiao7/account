@@ -16,6 +16,9 @@ type CategoryStore interface {
 
 	// QueryById 通过主键查询
 	QueryById(ctx context.Context, id int) (*model.Category, error)
+
+	// QueryByUserId 根据用户id查询其所有的分类
+	QueryByUserId(ctx context.Context, userId int) ([]model.Category, error)
 }
 
 type category struct {
@@ -25,7 +28,7 @@ func NewCategoryStore() CategoryStore {
 	return &category{}
 }
 
-// QueryAll 查询所有分类
+// QueryAll 查询账本下的所有分类
 func (c *category) QueryAll(ctx context.Context, bookId int) ([]model.Category, error) {
 	db := getDBFromContext(ctx)
 
@@ -34,6 +37,21 @@ func (c *category) QueryAll(ctx context.Context, bookId int) ([]model.Category, 
 	err := db.Select(&categories, sql, bookId)
 	if err != nil {
 		return nil, errors.Wrap(err, "query category all store.")
+	}
+
+	return categories, nil
+}
+
+// QueryByUserId 根据用户id查询其所有的分类
+func (c *category) QueryByUserId(ctx context.Context, userId int) ([]model.Category, error) {
+	db := getDBFromContext(ctx)
+
+	querySql := "select * from category where user_id = ?"
+	var categories = []model.Category{}
+	err := db.Select(&categories, querySql, userId)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "query category by userId store.")
 	}
 
 	return categories, nil

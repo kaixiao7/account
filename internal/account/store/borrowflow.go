@@ -9,15 +9,15 @@ import (
 
 type BorrowFlowStore interface {
 	// Add 添加借入借出流水
-	Add(ctx context.Context, bf *model.BorrowFlow) error
+	Add(ctx context.Context, bf *model.BorrowFlow_1) error
 	// Update 修改借入借出流水
-	Update(ctx context.Context, bf *model.BorrowFlow) error
+	Update(ctx context.Context, bf *model.BorrowFlow_1) error
 	// Delete 删除借入借出流水
 	Delete(ctx context.Context, id int) error
 	// QueryByAssetFlowId 根据资产流水id查询借入借出流水
-	QueryByAssetFlowId(ctx context.Context, assetFlowId int) ([]model.BorrowFlow, error)
+	QueryByAssetFlowId(ctx context.Context, assetFlowId int) ([]model.BorrowFlow_1, error)
 	// QueryById 根据id查询
-	QueryById(ctx context.Context, id int) (*model.BorrowFlow, error)
+	QueryById(ctx context.Context, id int) (*model.BorrowFlow_1, error)
 }
 
 type borrowFlow struct {
@@ -28,7 +28,7 @@ func NewBorrowFlowStore() BorrowFlowStore {
 }
 
 // Add 添加借入借出流水
-func (b *borrowFlow) Add(ctx context.Context, bf *model.BorrowFlow) error {
+func (b *borrowFlow) Add(ctx context.Context, bf *model.BorrowFlow_1) error {
 	db := getDBFromContext(ctx)
 
 	sql := "insert into asset_borrow_flow(asset_flow_id, asset_id, cost, record_time, type, remark, create_time, update_time) values (?,?,?,?,?,?,?,?)"
@@ -41,7 +41,7 @@ func (b *borrowFlow) Add(ctx context.Context, bf *model.BorrowFlow) error {
 }
 
 // Update 修改借入借出流水
-func (b *borrowFlow) Update(ctx context.Context, bf *model.BorrowFlow) error {
+func (b *borrowFlow) Update(ctx context.Context, bf *model.BorrowFlow_1) error {
 	db := getDBFromContext(ctx)
 
 	sql := "update asset_borrow_flow set asset_flow_id=?,asset_id=?,cost=?,record_time=?,type=?,remark=?,update_time=? where id = ?"
@@ -67,11 +67,11 @@ func (b *borrowFlow) Delete(ctx context.Context, id int) error {
 }
 
 // QueryByAssetFlowId 根据资产流水id查询借入借出流水
-func (b *borrowFlow) QueryByAssetFlowId(ctx context.Context, assetFlowId int) ([]model.BorrowFlow, error) {
+func (b *borrowFlow) QueryByAssetFlowId(ctx context.Context, assetFlowId int) ([]model.BorrowFlow_1, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from asset_borrow_flow where asset_flow_id=?"
-	var bfs = []model.BorrowFlow{}
+	var bfs = []model.BorrowFlow_1{}
 	err := db.Select(&bfs, querySql, assetFlowId)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -84,11 +84,11 @@ func (b *borrowFlow) QueryByAssetFlowId(ctx context.Context, assetFlowId int) ([
 }
 
 // QueryById 根据id查询
-func (b *borrowFlow) QueryById(ctx context.Context, id int) (*model.BorrowFlow, error) {
+func (b *borrowFlow) QueryById(ctx context.Context, id int) (*model.BorrowFlow_1, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from asset_borrow_flow where id=?"
-	var bf model.BorrowFlow
+	var bf model.BorrowFlow_1
 	err := db.Get(&bf, querySql, id)
 	if err != nil {
 		if err == sql.ErrNoRows {

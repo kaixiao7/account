@@ -30,6 +30,11 @@ type AssetFlowStore interface {
 	QueryById(ctx context.Context, id int) (*model.AssetFlow, error)
 	// QueryReverseFlow 查询转入、转出反转流水
 	QueryReverseFlow(ctx context.Context, assetId, targetAssetId, flowType int, time int64) (*model.AssetFlow, error)
+	// QueryByUserIdAndBorrowId 根据用户id和borrowId查询借入借出流水
+	QueryByUserIdAndBorrowId(ctx context.Context, userId, borrowId int) ([]model.AssetFlow, error)
+
+	// FinishedBorrow 结束债务
+	FinishedBorrow(ctx context.Context, assetId int) error
 }
 
 type assetFlow struct {
@@ -46,11 +51,7 @@ func (af *assetFlow) Add(ctx context.Context, flow *model.AssetFlow) error {
 	field := "user_id, asset_id, type, cost, record_time, remark, associate_name, create_time, update_time"
 	values := "?,?,?,?,?,?,?,?,?"
 	v := []any{flow.UserId, flow.AssetId, flow.Type, flow.Cost, flow.RecordTime, flow.Remark, flow.AssociateName, flow.CreateTime, flow.UpdateTime}
-	if flow.CategoryId != nil {
-		field = field + ", category_id"
-		values = values + ", ?"
-		v = append(v, flow.CategoryId)
-	}
+
 	if flow.TargetAssetId != nil {
 		field = field + ", target_asset_id"
 		values = values + ", ?"
@@ -60,6 +61,11 @@ func (af *assetFlow) Add(ctx context.Context, flow *model.AssetFlow) error {
 		field = field + ", finished"
 		values = values + ", ?"
 		v = append(v, flow.Finished)
+	}
+	if flow.BorrowId != nil {
+		field = field + ", borrow_id"
+		values = values + ", ?"
+		v = append(v, flow.BorrowId)
 	}
 
 	sql := "insert into asset_flow(" + field + ") values(" + values + ")"
@@ -77,10 +83,7 @@ func (af *assetFlow) Update(ctx context.Context, flow *model.AssetFlow) error {
 
 	sql := "update asset_flow set user_id=?,asset_id=?,type=?,cost=?,record_time=?,remark=?,associate_name=?,update_time=?"
 	v := []any{flow.UserId, flow.AssetId, flow.Type, flow.Cost, flow.RecordTime, flow.Remark, flow.AssociateName, flow.UpdateTime}
-	if flow.CategoryId != nil {
-		sql = sql + ",category_id=?"
-		v = append(v, flow.CategoryId)
-	}
+
 	if flow.TargetAssetId != nil {
 		sql = sql + ",target_asset_id=?"
 		v = append(v, flow.TargetAssetId)
@@ -89,6 +92,11 @@ func (af *assetFlow) Update(ctx context.Context, flow *model.AssetFlow) error {
 		sql = sql + ",finished=?"
 		v = append(v, flow.Finished)
 	}
+	if flow.BorrowId != nil {
+		sql = sql + ",borrow_id=?"
+		v = append(v, flow.BorrowId)
+	}
+
 	sql = sql + " where id = ?"
 	v = append(v, flow.Id)
 
@@ -153,6 +161,20 @@ func (af *assetFlow) QueryByUserIdAndType(ctx context.Context, userId, assetFlow
 	return assetFlows, nil
 }
 
+// QueryByUserIdAndBorrowId 根据用户id和borrowId查询借入借出流水
+func (af *assetFlow) QueryByUserIdAndBorrowId(ctx context.Context, userId, borrowId int) ([]model.AssetFlow, error) {
+	db := getDBFromContext(ctx)
+
+	querySql := "select * from asset_flow where user_id = ? and borrow_id = ? and del = ?"
+	var assetFlows = []model.AssetFlow{}
+	err := db.Select(&assetFlows, querySql, userId, borrowId, constant.DelFalse)
+	if err != nil {
+		return nil, errors.Wrap(err, "query asset flow by userId and assetId store")
+	}
+
+	return assetFlows, nil
+}
+
 // QueryById 根据id查询
 func (af *assetFlow) QueryById(ctx context.Context, id int) (*model.AssetFlow, error) {
 	db := getDBFromContext(ctx)
@@ -185,4 +207,16 @@ func (af *assetFlow) QueryReverseFlow(ctx context.Context, assetId, targetAssetI
 	}
 
 	return &assetFlow, nil
+}
+
+// FinishedBorrow 结束债务
+func (af *assetFlow) FinishedBorrow(ctx context.Context, assetId int) error {
+	db := getDBFromContext(ctx)
+
+	sql := "update asset_flow set finished = ? where asset_id = ?"
+	_, err := db.Exec(sql, 1, assetId)
+	if err != nil {
+		return errors.Wrap(err, "finished borrow store")
+	}
+	return nil
 }

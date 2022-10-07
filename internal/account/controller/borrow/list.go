@@ -15,7 +15,7 @@ func (b *BorrowController) List(c *gin.Context) {
 
 	borrowType := c.Query("type")
 	borrowTypeNum, err := strconv.Atoi(borrowType)
-	if err != nil || (borrowTypeNum != 0 && borrowTypeNum != 1) {
+	if err != nil {
 		core.WriteRespErr(c, errno.New(errno.ErrValidation))
 		return
 	}

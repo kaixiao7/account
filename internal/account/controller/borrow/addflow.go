@@ -17,6 +17,7 @@ type addFlowReq struct {
 	Remark     string         `json:"remark,omitempty"`
 }
 
+// AddFlow 添加借入/借出流水(还款/收款)
 func (b *BorrowController) AddFlow(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
@@ -32,12 +33,12 @@ func (b *BorrowController) AddFlow(c *gin.Context) {
 	}
 
 	flow := model.BorrowFlow{
-		AssetFlowId: assetFlowId,
-		AssetId:     flowReq.AssetId,
-		Cost:        flowReq.Cost,
-		RecordTime:  flowReq.RecordTime.Timestamp(),
-		Type:        flowReq.Type,
-		Remark:      flowReq.Remark,
+		BorrowId:   assetFlowId,
+		AssetId:    flowReq.AssetId,
+		Cost:       flowReq.Cost,
+		RecordTime: flowReq.RecordTime.Timestamp(),
+		Type:       flowReq.Type,
+		Remark:     flowReq.Remark,
 	}
 	if err := b.borrowSrv.AddBorrowFlow(c, &flow, userId); err != nil {
 		core.WriteRespErr(c, err)
