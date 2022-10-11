@@ -2,8 +2,8 @@ run_mod: debug
 port: :8080
 jwt:
   secret: RtgYsliaukijq8s2l9p3a4UQBb7 # jwt签名密钥
-  expire: 2                           # token过期时间，单位：小时
-  refresh-token: 7                    # refreshToken过期时间，单位：天
+  token-access-expire: 7200           # access token  过期时间，7200秒，2个小时
+  token-refresh-expire: 2592000       # refresh token 过期时间，30天，单位：秒
 
 log:
   level: debug

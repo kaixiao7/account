@@ -37,9 +37,9 @@ func installController(g *gin.Engine) {
 	userController := user.NewUserController()
 
 	g.POST("/login", userController.Login)
-	g.GET("/refresh", userController.RefreshToken)
-
 	g.Use(middleware.Auth())
+
+	g.GET("/refresh", userController.RefreshToken)
 
 	users := g.Group("/users")
 	{

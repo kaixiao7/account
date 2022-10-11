@@ -41,7 +41,7 @@ func (u *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	// 登录成功，发送token
+	// 登录成功，生成token并响应
 	resp, err := generateTokens(user.Id)
 	if err != nil {
 		core.WriteRespErr(c, err)
