@@ -26,6 +26,9 @@ type BillStore interface {
 	// QueryById 根据主键id查询
 	QueryById(ctx context.Context, id int) (*model.Bill, error)
 
+	// QueryOneByAssetIdAndTime 查询指定时间之前的最近一条记录
+	QueryOneByAssetIdAndTime(ctx context.Context, assetId int, time int64) (*model.Bill, error)
+
 	// QueryBillTag 查询账单的标签备注
 	QueryBillTag(ctx context.Context, bookId int) ([]model.BillTag, error)
 }
@@ -111,6 +114,24 @@ func (b *bill) QueryByAssetIdAndTime(ctx context.Context, assetId int, beginTime
 	}
 
 	return bills, nil
+}
+
+// QueryOneByAssetIdAndTime 查询指定时间之前的最近一条记录
+func (b *bill) QueryOneByAssetIdAndTime(ctx context.Context, assetId int, time int64) (*model.Bill, error) {
+	db := getDBFromContext(ctx)
+
+	querySql := "select * from bill where asset_id = ? and record_time < ? limit 1"
+
+	var bill model.Bill
+	err := db.Get(&bill, querySql, assetId, time)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "query one bill store.")
+	}
+
+	return &bill, nil
 }
 
 // QueryById 根据主键id查询

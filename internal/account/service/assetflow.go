@@ -26,27 +26,18 @@ type AssetFlowSrv interface {
 
 	// QueryByAssetId 根据账户id查询其下的所有流水信息
 	QueryByAssetId(ctx context.Context, assetId, userId int) ([]model.AssetFlow, error)
-	// QueryByAssetIdAndTime 根据资产id查询时间范围内的流水和账单
+	// QueryByAssetIdAndTime 根据资产id查询距离指定时间之前最近一个月的数据
 	QueryByAssetIdAndTime(ctx context.Context, assetId, userId int, date time.Time) ([]model.AssetFlowVO, error)
-
-	// QueryBorrowIn 查询借入记录
-	// QueryBorrowIn(ctx context.Context, userId int) ([]model.AssetFlow, error)
-	// // QueryBorrowOut 查询借出记录
-	// QueryBorrowOut(ctx context.Context, userId int) ([]model.AssetFlow, error)
-	// // QueryBorrowFlowIn 查询借入流水
-	// QueryBorrowFlowIn(ctx context.Context, userId int) ([]model.AssetFlow, error)
-	// // QueryBorrowFlowOut 查询借出流水
-	// QueryBorrowFlowOut(ctx context.Context, userId int) ([]model.AssetFlow, error)
 }
 
-type assertFlowService struct {
+type assetFlowService struct {
 	assetStore     store.AssetStore
 	assetFlowStore store.AssetFlowStore
 	billStore      store.BillStore
 }
 
 func NewAssertFlowSrv() AssetFlowSrv {
-	return &assertFlowService{
+	return &assetFlowService{
 		assetStore:     store.NewAssetStore(),
 		assetFlowStore: store.NewAssetFlowStore(),
 		billStore:      store.NewBillStore(),
@@ -54,7 +45,7 @@ func NewAssertFlowSrv() AssetFlowSrv {
 }
 
 // Add 添加流水
-func (af *assertFlowService) Add(ctx context.Context, assetFlow *model.AssetFlow) error {
+func (af *assetFlowService) Add(ctx context.Context, assetFlow *model.AssetFlow) error {
 	if err := af.saveCheck(ctx, assetFlow); err != nil {
 		return err
 	}
@@ -89,7 +80,7 @@ func (af *assertFlowService) Add(ctx context.Context, assetFlow *model.AssetFlow
 // Update 修改流水
 // 仅修改基本信息，不会修改类型及账户
 // 其实流水不应该被修改，只能增加、删除
-func (af *assertFlowService) Update(ctx context.Context, assetFlow *model.AssetFlow) error {
+func (af *assetFlowService) Update(ctx context.Context, assetFlow *model.AssetFlow) error {
 	// 仅修改基本信息，不会修改类型及账户
 	assetFlowBefore, err := af.checkAssetFlow(ctx, assetFlow.Id, assetFlow.UserId)
 	if err != nil {
@@ -148,7 +139,7 @@ func (af *assertFlowService) Update(ctx context.Context, assetFlow *model.AssetF
 }
 
 // Delete 删除流水
-func (af *assertFlowService) Delete(ctx context.Context, assertFlowId, userId int) error {
+func (af *assetFlowService) Delete(ctx context.Context, assertFlowId, userId int) error {
 	assetFlow, err := af.checkAssetFlow(ctx, assertFlowId, userId)
 	if err != nil {
 		return err
@@ -197,7 +188,7 @@ func (af *assertFlowService) Delete(ctx context.Context, assertFlowId, userId in
 // 转账操作的反转插入
 // 如果是转入：那么向对方账户插入转出记录
 // 如果是转出：那么向对方账户插入转入记录
-func (af *assertFlowService) transferReverse(ctx context.Context, assetFlow model.AssetFlow) error {
+func (af *assetFlowService) transferReverse(ctx context.Context, assetFlow model.AssetFlow) error {
 	diff := assetFlow.Cost
 	// 反转账户id
 	assetId := assetFlow.AssetId
@@ -225,7 +216,7 @@ func (af *assertFlowService) transferReverse(ctx context.Context, assetFlow mode
 }
 
 // 查询转入、转出反转流水
-func (af *assertFlowService) transferReverseQuery(ctx context.Context, assetFlow *model.AssetFlow) (*model.AssetFlow, error) {
+func (af *assetFlowService) transferReverseQuery(ctx context.Context, assetFlow *model.AssetFlow) (*model.AssetFlow, error) {
 	flowType := constant.AssetTypeTransferIn
 	if assetFlow.Type == constant.AssetTypeTransferIn {
 		flowType = constant.AssetTypeTransferOut
@@ -244,7 +235,7 @@ func (af *assertFlowService) transferReverseQuery(ctx context.Context, assetFlow
 }
 
 // 账户余额恢复
-func (af *assertFlowService) moneyRegain(ctx context.Context, assetFlow *model.AssetFlow) error {
+func (af *assetFlowService) moneyRegain(ctx context.Context, assetFlow *model.AssetFlow) error {
 	cost := assetFlow.Cost
 	// 转入、借入、收款 将金额变为负数
 	if assetFlow.Type == constant.AssetTypeTransferIn || assetFlow.Type == constant.AssetTypeBorrowIn ||
@@ -259,7 +250,7 @@ func (af *assertFlowService) moneyRegain(ctx context.Context, assetFlow *model.A
 	return nil
 }
 
-func (af *assertFlowService) checkAsset(ctx context.Context, assetId, userId int) (*model.Asset, error) {
+func (af *assetFlowService) checkAsset(ctx context.Context, assetId, userId int) (*model.Asset, error) {
 	asset, err := af.assetStore.QueryById(ctx, assetId)
 	if err != nil {
 		return nil, err
@@ -276,7 +267,7 @@ func (af *assertFlowService) checkAsset(ctx context.Context, assetId, userId int
 	return asset, nil
 }
 
-func (af *assertFlowService) checkAssetFlow(ctx context.Context, assetFlowId, userId int) (*model.AssetFlow, error) {
+func (af *assetFlowService) checkAssetFlow(ctx context.Context, assetFlowId, userId int) (*model.AssetFlow, error) {
 	assetFlow, err := af.assetFlowStore.QueryById(ctx, assetFlowId)
 	if err != nil {
 		return nil, err
@@ -294,7 +285,7 @@ func (af *assertFlowService) checkAssetFlow(ctx context.Context, assetFlowId, us
 }
 
 // 插入、更新操作的前置校验
-func (af *assertFlowService) saveCheck(ctx context.Context, assetFlow *model.AssetFlow) error {
+func (af *assetFlowService) saveCheck(ctx context.Context, assetFlow *model.AssetFlow) error {
 	// 收入、支出、修改余额类型不应该出现在这里
 	if assetFlow.Type == constant.AssetTypeIncome || assetFlow.Type == constant.AssetTypeExpense ||
 		assetFlow.Type == constant.AssetTypeModify {
@@ -329,7 +320,7 @@ func (af *assertFlowService) saveCheck(ctx context.Context, assetFlow *model.Ass
 }
 
 // QueryByAssetId 根据账户id查询其下的所有流水信息
-func (af *assertFlowService) QueryByAssetId(ctx context.Context, assetId, userId int) ([]model.AssetFlow, error) {
+func (af *assetFlowService) QueryByAssetId(ctx context.Context, assetId, userId int) ([]model.AssetFlow, error) {
 	_, err := af.checkAsset(ctx, assetId, userId)
 	if err != nil {
 		return nil, err
@@ -337,8 +328,22 @@ func (af *assertFlowService) QueryByAssetId(ctx context.Context, assetId, userId
 	return af.assetFlowStore.QueryByUserIdAndAssetId(ctx, userId, assetId)
 }
 
-// QueryByAssetIdAndTime 根据资产id查询时间范围内的流水和账单
-func (af *assertFlowService) QueryByAssetIdAndTime(ctx context.Context, assetId, userId int, date time.Time) ([]model.AssetFlowVO, error) {
+func (af *assetFlowService) getQueryDate(assetCreateTs int64, pageNum int) (time.Time, int, error) {
+	now := time.Now()
+	assetTime := time.Unix(assetCreateTs, 0)
+	total := timex.CalcMonths(assetTime, now)
+	if pageNum > total {
+		return now, 0, errno.New(errno.ErrTokenInvalid)
+	}
+
+	queryDate := timex.SubMonth(now, pageNum)
+
+	return queryDate, total, nil
+}
+
+// QueryByAssetIdAndTime 根据资产id查询距离指定时间之前最近一个月的数据
+// 因为指定时间的月份有可能没有数据
+func (af *assetFlowService) QueryByAssetIdAndTime(ctx context.Context, assetId, userId int, date time.Time) ([]model.AssetFlowVO, error) {
 	asset, err := af.checkAsset(ctx, assetId, userId)
 	if err != nil {
 		return nil, err
@@ -349,24 +354,54 @@ func (af *assertFlowService) QueryByAssetIdAndTime(ctx context.Context, assetId,
 		return nil, errno.New(errno.ErrBillNotMore)
 	}
 
-	begin := timex.GetFirstDateOfMonth(date)
-	end := timex.GetLastDateOfMonth(date)
+	end := timex.GetLastDateTimeOfMonth(date)
 
-	var ret = []model.AssetFlowVO{}
-
-	flows, err := af.assetFlowStore.QueryByUserIdAndAssetId(ctx, userId, assetId)
+	// 查询流水距离end之前的最近一条记录，获取其record_time
+	firstFlow, err := af.assetFlowStore.QueryOneByUserIdAndAssetIdAndTime(ctx, userId, assetId, end.Unix())
+	if err != nil {
+		return nil, err
+	}
+	// 查询账单距离end之前的最近一条记录，获取其record_time
+	firstBill, err := af.billStore.QueryOneByAssetIdAndTime(ctx, assetId, end.Unix())
 	if err != nil {
 		return nil, err
 	}
 
-	ret = append(ret, model.AssetFlow2VO(flows)...)
-
-	// 查询账户下的账单记录
-	bills, err := af.billStore.QueryByAssetIdAndTime(ctx, assetId, begin.Unix(), end.Unix())
-	if err != nil {
-		return nil, err
+	// 没有更多了
+	if firstFlow == nil && firstBill == nil {
+		return nil, errno.New(errno.ErrBillNotMore)
 	}
-	ret = append(ret, model.Bill2VO(bills)...)
+
+	flowDate := assetTime
+	if firstFlow != nil {
+		flowDate = time.Unix(firstFlow.RecordTime, 0)
+	}
+	billDate := assetTime
+	if firstBill != nil {
+		billDate = time.Unix(firstBill.RecordTime, 0)
+	}
+
+	var ret []model.AssetFlowVO
+	if timex.IsSameMonth(flowDate, billDate) || flowDate.After(billDate) {
+		queryBegin := timex.GetFirstDateOfMonth(flowDate).Unix()
+		queryEnd := timex.GetLastDateTimeOfMonth(flowDate).Unix()
+		// 查询流水
+		flows, err := af.assetFlowStore.QueryByUserIdAndAssetIdAndTime(ctx, userId, assetId, queryBegin, queryEnd)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, model.AssetFlow2VO(flows)...)
+	}
+	if timex.IsSameMonth(flowDate, billDate) || billDate.After(flowDate) {
+		queryBegin := timex.GetFirstDateOfMonth(billDate).Unix()
+		queryEnd := timex.GetLastDateTimeOfMonth(billDate).Unix()
+		// 查询账户下的账单记录
+		bills, err := af.billStore.QueryByAssetIdAndTime(ctx, assetId, queryBegin, queryEnd)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, model.Bill2VO(bills)...)
+	}
 
 	// 根据记录时间倒序排序
 	sort.Slice(ret, func(i, j int) bool {
@@ -375,27 +410,3 @@ func (af *assertFlowService) QueryByAssetIdAndTime(ctx context.Context, assetId,
 
 	return ret, nil
 }
-
-// QueryBorrowIn 查询借入记录
-// func (af *assertFlowService) QueryBorrowIn(ctx context.Context, userId int) ([]model.AssetFlow, error) {
-// 	return af.queryBorrow(ctx, userId, constant.AssetTypeBorrowIn)
-// }
-//
-// // QueryBorrowOut 查询借出记录
-// func (af *assertFlowService) QueryBorrowOut(ctx context.Context, userId int) ([]model.AssetFlow, error) {
-// 	return af.queryBorrow(ctx, userId, constant.AssetTypeBorrowOut)
-// }
-//
-// // QueryBorrowFlowIn 查询借入流水
-// func (af *assertFlowService) QueryBorrowFlowIn(ctx context.Context, userId int) ([]model.AssetFlow, error) {
-// 	return af.queryBorrow(ctx, userId, constant.AssetTypeStill)
-// }
-//
-// // QueryBorrowFlowOut 查询借出流水
-// func (af *assertFlowService) QueryBorrowFlowOut(ctx context.Context, userId int) ([]model.AssetFlow, error) {
-// 	return af.queryBorrow(ctx, userId, constant.AssetTypeHarvest)
-// }
-//
-// func (af *assertFlowService) queryBorrow(ctx context.Context, userId, borrowType int) ([]model.AssetFlow, error) {
-// 	return af.assetFlowStore.QueryByUserIdAndType(ctx, userId, borrowType)
-// }
