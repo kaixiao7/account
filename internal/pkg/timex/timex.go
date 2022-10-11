@@ -68,6 +68,12 @@ func GetLastDateOfMonth(d time.Time) time.Time {
 	return GetFirstDateOfMonth(d).AddDate(0, 1, -1)
 }
 
+// GetLastDateTimeOfMonth 获取指定日期所在月的最后一天的最后时刻(23:59:59)
+func GetLastDateTimeOfMonth(d time.Time) time.Time {
+	date := GetLastDateOfMonth(d)
+	return time.Date(date.Year(), date.Month(), date.Day(), 23, 59, 59, 0, d.Location())
+}
+
 func getZeroTime(d time.Time) time.Time {
 	return time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, d.Location())
 }
@@ -80,4 +86,40 @@ func Parse(str, pattern string) (time.Time, error) {
 // Format 格式化时间
 func Format(date time.Time, pattern string) string {
 	return date.Format(pattern)
+}
+
+// CalcMonths 计算两个日期之间相差的月数
+func CalcMonths(t1, t2 time.Time) int {
+	year1 := t1.Year()
+	year2 := t2.Year()
+	month1 := int(t1.Month())
+	month2 := int(t2.Month())
+
+	// 年相等，返回月份差
+	if year1 == year2 {
+		return abs(month1 - month2)
+	}
+
+	// 年不相等，则返回 月份差 + 年相差 * 12
+	y := abs(year1 - year2)
+	m := abs(month1 - month2)
+	return (y-1)*12 + 12 - m
+}
+
+// SubMonth 指定日期减去月数
+func SubMonth(t1 time.Time, months int) time.Time {
+	return t1.AddDate(0, -months, 0)
+}
+
+func abs(n int) int {
+	if n > 0 {
+		return n
+	} else {
+		return -n
+	}
+}
+
+// IsSameMonth 判断两个时间是否是同一个月
+func IsSameMonth(t1, t2 time.Time) bool {
+	return t1.Year() == t2.Year() && t1.Month() == t2.Month()
 }

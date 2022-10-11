@@ -33,6 +33,11 @@ type AssetFlowStore interface {
 	// QueryByUserIdAndBorrowId 根据用户id和borrowId查询借入借出流水
 	QueryByUserIdAndBorrowId(ctx context.Context, userId, borrowId int) ([]model.AssetFlow, error)
 
+	// QueryOneByUserIdAndAssetIdAndTime 查询指定时间之前的最近一条记录
+	QueryOneByUserIdAndAssetIdAndTime(ctx context.Context, userId, assetId int, recordTime int64) (*model.AssetFlow, error)
+	// QueryByUserIdAndAssetIdAndTime 查询指定时间范围内的记录
+	QueryByUserIdAndAssetIdAndTime(ctx context.Context, userId, assetId int, begin, end int64) ([]model.AssetFlow, error)
+
 	// FinishedBorrow 结束债务
 	FinishedBorrow(ctx context.Context, assetId int) error
 }
@@ -203,10 +208,44 @@ func (af *assetFlow) QueryReverseFlow(ctx context.Context, assetId, targetAssetI
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, errors.Wrap(err, "asset flow query by id store")
+		return nil, errors.Wrap(err, "asset flow query reverse store")
 	}
 
 	return &assetFlow, nil
+}
+
+// QueryOneByUserIdAndAssetIdAndTime 查询指定时间之前的最近一条记录
+func (af *assetFlow) QueryOneByUserIdAndAssetIdAndTime(ctx context.Context, userId, assetId int, recordTime int64) (*model.AssetFlow, error) {
+	db := getDBFromContext(ctx)
+
+	querySql := "select * from asset_flow where user_id = ? and asset_id = ? and record_time < ? and del=? limit 1"
+	var assetFlow model.AssetFlow
+	err := db.Get(&assetFlow, querySql, userId, assetId, recordTime, constant.DelFalse)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "asset flow query one by id store")
+	}
+
+	return &assetFlow, nil
+}
+
+// QueryByUserIdAndAssetIdAndTime 查询指定时间范围内的记录
+func (af *assetFlow) QueryByUserIdAndAssetIdAndTime(ctx context.Context, userId, assetId int, begin, end int64) ([]model.AssetFlow, error) {
+	db := getDBFromContext(ctx)
+
+	querySql := "select * from asset_flow where user_id = ? and asset_id = ? and record_time >= ? and record_time <= ? and del=?"
+	var assetFlows = []model.AssetFlow{}
+	err := db.Select(&assetFlows, querySql, userId, assetId, begin, end, constant.DelFalse)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "asset flow query by id asset time store")
+	}
+
+	return assetFlows, nil
 }
 
 // FinishedBorrow 结束债务
