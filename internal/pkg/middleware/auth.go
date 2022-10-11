@@ -26,15 +26,24 @@ func Auth() gin.HandlerFunc {
 		// Parse the header to get the token part.
 		fmt.Sscanf(header, "Bearer %s", &t)
 
-		userId, err := token.Parse(t)
+		uri := c.Request.RequestURI
+
+		var identity int
+		var err error
+		if uri == "/refresh" {
+			identity, err = token.DecodeRefreshToken(t)
+		} else {
+			identity, err = token.DecodeAccessToken(t)
+		}
 		if err != nil {
-			log.Error("token验证失败")
+			log.Error("token验证失败: " + err.Error())
+
 			core.WriteRespErr(c, errno.New(errno.ErrTokenInvalid))
 			c.Abort()
 			return
 		}
 
-		c.Set(constant.XUserIdKey, userId)
+		c.Set(constant.XUserIdKey, identity)
 		c.Next()
 	}
 }

@@ -69,7 +69,9 @@ func run() error {
 	defer store.Close()
 
 	// 初始化jwt相关设置
-	token.Init(viper.GetString("jwt.secret"))
+	token.Init(viper.GetString("jwt.secret"),
+		viper.GetInt64("jwt.token-access-expire"),
+		viper.GetInt64("jwt.token-refresh-expire"))
 
 	// 初始化gin参数验证
 	if err := validatetrans.Init(); err != nil {

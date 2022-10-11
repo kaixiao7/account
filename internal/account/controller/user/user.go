@@ -5,8 +5,6 @@ import (
 	"kaixiao7/account/internal/pkg/errno"
 	"kaixiao7/account/internal/pkg/log"
 	"kaixiao7/account/internal/pkg/token"
-
-	"github.com/spf13/viper"
 )
 
 type UserController struct {
@@ -19,23 +17,19 @@ func NewUserController() *UserController {
 }
 
 func generateTokens(userId int) (*Tokens, error) {
-	// token
-	tokenExp := viper.GetInt("jwt.expire")
-	t, err := token.Sign(userId, tokenExp)
+
+	accessToken, err := token.GenerateAccessToken(userId)
+	if err != nil {
+		return nil, errno.NewWithError(errno.ErrToken, err)
+	}
+	refreshToken, err := token.GenerateRefreshToken(userId)
 	if err != nil {
 		return nil, errno.NewWithError(errno.ErrToken, err)
 	}
 
-	// refreshToken
-	refreshTokenExp := viper.GetInt("jwt.refresh-token")
-	refreshToken, err := token.Sign(userId, refreshTokenExp*24)
-	if err != nil {
-		return nil, errno.NewWithError(errno.ErrToken, err)
-	}
-
-	log.Debugf("access_token: %s \n refresh_token: %s\n", t, refreshToken)
+	log.Debugf("access_token: %s \n refresh_token: %s\n", accessToken, refreshToken)
 	tokens := Tokens{
-		AccessToken:  t,
+		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
 
