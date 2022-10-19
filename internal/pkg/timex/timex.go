@@ -123,3 +123,8 @@ func abs(n int) int {
 func IsSameMonth(t1, t2 time.Time) bool {
 	return t1.Year() == t2.Year() && t1.Month() == t2.Month()
 }
+
+// GetTime 根据指定年月日获取时间对象
+func GetTime(year, month, day int) time.Time {
+	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local)
+}

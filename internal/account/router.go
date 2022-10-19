@@ -127,6 +127,7 @@ func installController(g *gin.Engine) {
 		statisticController := statistic.NewStatisticController()
 
 		statistics.GET("", statisticController.List)
+		statistics.GET("/years/:year", statisticController.YearStatistic)
 
 	}
 }

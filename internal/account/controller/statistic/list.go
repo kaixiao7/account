@@ -30,11 +30,12 @@ func (s *StatisticController) List(c *gin.Context) {
 		return
 	}
 
-	bills, err := s.statisticsSrv.QueryBill(c, bookId, userId, beginTime.Unix(), endTime.Unix())
+	// bills, err := s.statisticsSrv.QueryBill(c, bookId, userId, beginTime.Unix(), endTime.Unix())
+	ret, err := s.statisticsSrv.StatisticByCategory(c, bookId, userId, beginTime, endTime)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return
 	}
 
-	core.WriteRespSuccess(c, bills)
+	core.WriteRespSuccess(c, ret)
 }
