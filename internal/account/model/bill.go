@@ -30,3 +30,10 @@ type DayBill struct {
 	Expense float64        `json:"expense,omitempty"`
 	Bills   []Bill         `json:"bills,omitempty"`
 }
+
+type CategoryStatisticDB struct {
+	CategoryId int     `db:"category_id"`
+	Type       int     `db:"type"`
+	Count      int     `db:"count"`
+	Cost       float64 `db:"cost"`
+}

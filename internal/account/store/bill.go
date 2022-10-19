@@ -31,6 +31,9 @@ type BillStore interface {
 
 	// QueryBillTag 查询账单的标签备注
 	QueryBillTag(ctx context.Context, bookId int) ([]model.BillTag, error)
+
+	// StatisticByCategory 根据分类统计账单
+	StatisticByCategory(ctx context.Context, bookId int, beginTime, endTime int64) ([]model.CategoryStatisticDB, error)
 }
 
 type bill struct {
@@ -170,4 +173,22 @@ func (b *bill) QueryBillTag(ctx context.Context, bookId int) ([]model.BillTag, e
 	}
 
 	return tags, nil
+}
+
+// StatisticByCategory 根据分类统计账单
+func (b *bill) StatisticByCategory(ctx context.Context, bookId int, beginTime, endTime int64) ([]model.CategoryStatisticDB, error) {
+	db := getDBFromContext(ctx)
+	querySql := "select category_id, type, count(category_id) as count, sum(cost) as cost from bill where book_id = ? and record_time >= ? and record_time <= ? group by category_id"
+
+	var ret = []model.CategoryStatisticDB{}
+	err := db.Select(&ret, querySql, bookId, beginTime, endTime)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "StatisticByCategory store.")
+	}
+
+	return ret, nil
 }
