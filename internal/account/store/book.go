@@ -31,7 +31,7 @@ func (b *book) QueryBookList(ctx context.Context, userId int) ([]*model.Book, er
 	db := getDBFromContext(ctx)
 	sql := `
 		select *
-		from account_book
+		from user_book
 		where del_flag = 0
 		and id in (
 			select book_id
@@ -53,7 +53,7 @@ func (b *book) QueryBookList(ctx context.Context, userId int) ([]*model.Book, er
 func (b *book) QueryById(ctx context.Context, id int) (*model.Book, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from account_book where id = ?"
+	querySql := "select * from user_book where id = ?"
 	var book model.Book
 	err := db.Get(&book, querySql, id)
 	if err != nil {

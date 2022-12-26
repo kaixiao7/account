@@ -9,108 +9,82 @@ import (
 	"kaixiao7/account/internal/pkg/constant"
 	"kaixiao7/account/internal/pkg/errno"
 	"kaixiao7/account/internal/pkg/log"
-	"kaixiao7/account/internal/pkg/timex"
 )
 
 type BillSrv interface {
 	// Add 添加账单
-	Add(ctx context.Context, bill *model.Bill) error
+	Add(ctx context.Context, bill *model.AccountFlow) error
 
 	// Update 更新账单
-	Update(ctx context.Context, bill *model.Bill) error
+	Update(ctx context.Context, bill *model.AccountFlow) error
 
 	// Delete 删除账单
 	Delete(ctx context.Context, billId, userId, bookId int) error
 
-	// QueryByTime 查询账本在指定月份的账单
-	QueryByTime(ctx context.Context, bookId, userId int, date time.Time) ([]model.DayBill, error)
+	// QueryByPage 分页查询账单列表（支出、收入）
+	QueryByPage(ctx context.Context, bookId, userId, pageSize, pageNum int) (model.Page, error)
 
 	// QueryTag 查询账单标签/备注
 	QueryTag(ctx context.Context, bookId, userId int) ([]model.BillTag, error)
 }
 
 type billService struct {
-	billStore     store.BillStore
-	categoryStore store.CategoryStore
-	bookStore     store.BookStore
-	userStore     store.UserStore
-	assetStore    store.AssetStore
+	categoryStore    store.CategoryStore
+	bookStore        store.BookStore
+	userStore        store.UserStore
+	accountStore     store.AccountStore
+	accountFlowStore store.AccountFlow
 }
 
 func NewBillSrv() BillSrv {
 	return &billService{
-		billStore:     store.NewBillStore(),
-		categoryStore: store.NewCategoryStore(),
-		bookStore:     store.NewBookStore(),
-		userStore:     store.NewUserStore(),
-		assetStore:    store.NewAssetStore(),
+		categoryStore:    store.NewCategoryStore(),
+		bookStore:        store.NewBookStore(),
+		userStore:        store.NewUserStore(),
+		accountStore:     store.NewAccountStore(),
+		accountFlowStore: store.NewAccountFlowStore(),
 	}
 }
 
-// QueryByTime 查询账本在指定月份的账单
-func (b *billService) QueryByTime(ctx context.Context, bookId, userId int, date time.Time) ([]model.DayBill, error) {
+// QueryByPage 分页查询账单列表（支出、收入）
+func (b *billService) QueryByPage(ctx context.Context, bookId, userId, pageSize, pageNum int) (model.Page, error) {
 	// 校验账本是否存在
-	book, err := b.checkBook(ctx, bookId)
+	_, err := b.checkBook(ctx, bookId)
 	if err != nil {
-		return nil, err
+		return model.Page{}, err
 	}
 	// 校验用户是否是账本的成员
-	if err := b.checkUserInBook(ctx, bookId, userId); err != nil {
-		return nil, err
+	if err = b.checkUserInBook(ctx, bookId, userId); err != nil {
+		return model.Page{}, err
 	}
-
-	// 判断传入时间是否在账本创建时间之后，如果是，则返回没有更多数据了
-	bookTime := time.Unix(book.CreateTime, 0)
-	if date.Year() < bookTime.Year() || date.Month() < bookTime.Month() {
-		return nil, errno.New(errno.ErrBillNotMore)
-	}
-
-	begin := timex.GetFirstDateOfMonth(date)
-	end := timex.GetLastDateOfMonth(date)
-	end = end.Add(time.Hour * 24)
-
-	bills, err := b.billStore.QueryByTime(ctx, bookId, begin.Unix(), end.Unix())
+	count, err := b.accountFlowStore.QueryByBookIdCount(ctx, bookId)
 	if err != nil {
-		return nil, err
+		return model.Page{}, err
 	}
-	if len(bills) == 0 {
-		return []model.DayBill{}, nil
+	// 计算总页数
+	var total int
+	if count%pageSize == 0 {
+		total = count / pageSize
+	} else {
+		total = count/pageSize + 1
+	}
+	ret := model.Page{
+		Total:    total,
+		PageSize: pageSize,
+		PageNum:  pageNum,
+	}
+	if total < pageNum {
+		return ret, nil
 	}
 
-	// 日统计
-	diffDays := int(end.Sub(begin).Hours() / 24)
-	var dayBills []model.DayBill
-
-	for i := diffDays - 1; i >= 0; i-- {
-		start := begin.AddDate(0, 0, i)
-		startTs := start.Unix()
-		endTs := begin.AddDate(0, 0, i+1).Unix()
-		var dayBill []model.Bill
-		var income float64
-		var expense float64
-		for _, bill := range bills {
-			if bill.RecordTime >= startTs && bill.RecordTime < endTs {
-				if *bill.Type == constant.AssetTypeIncome {
-					income = income + bill.Cost
-				} else {
-					expense = expense + bill.Cost
-				}
-				dayBill = append(dayBill, bill)
-			}
-		}
-
-		if dayBill == nil {
-			continue
-		}
-
-		dayBills = append(dayBills, model.DayBill{
-			Date:    timex.JsonTime(start),
-			Income:  income,
-			Expense: expense,
-			Bills:   dayBill,
-		})
+	result, err := b.accountFlowStore.QueryByBookIdPage(ctx, bookId, pageNum, pageSize)
+	if err != nil {
+		return model.Page{}, err
 	}
-	return dayBills, nil
+
+	ret.Data = result
+
+	return ret, nil
 }
 
 // QueryTag 查询账单标签/备注
@@ -125,16 +99,16 @@ func (b *billService) QueryTag(ctx context.Context, bookId, userId int) ([]model
 		return nil, err
 	}
 
-	return b.billStore.QueryBillTag(ctx, bookId)
+	return b.accountFlowStore.QueryBillTag(ctx, bookId)
 }
 
 // Add 添加账单
-func (b *billService) Add(ctx context.Context, bill *model.Bill) error {
+func (b *billService) Add(ctx context.Context, bill *model.AccountFlow) error {
 	return b.save(ctx, bill)
 }
 
 // Update 更新账单
-func (b *billService) Update(ctx context.Context, bill *model.Bill) error {
+func (b *billService) Update(ctx context.Context, bill *model.AccountFlow) error {
 	return b.save(ctx, bill)
 }
 
@@ -145,17 +119,22 @@ func (b *billService) Delete(ctx context.Context, billId, userId, bookId int) er
 		return err
 	}
 	// 只有账单的拥有者才可以删除
-	if bill.UserId != userId || bill.BookId != bookId {
+	if bill.UserId != userId || *bill.BookId != bookId {
 		return errno.New(errno.ErrBillNotDelete)
 	}
 	return WithTransaction(ctx, func(ctx context.Context) error {
-		err = b.billStore.Delete(ctx, billId)
+		err = b.accountFlowStore.Delete(ctx, billId)
 		if err != nil {
 			return err
 		}
 		// 指定账户加上金额
-		if bill.AssetId > 0 {
-			if err := b.assetStore.ModifyBalance(ctx, bill.AssetId, bill.Cost); err != nil {
+		if bill.AccountId > 0 {
+			cost := bill.Cost
+			// 如果删除的是收入，则取反
+			if bill.Type == constant.AccountTypeIncome {
+				cost = -cost
+			}
+			if err := b.accountStore.ModifyBalance(ctx, bill.AccountId, cost); err != nil {
 				return err
 			}
 		}
@@ -164,21 +143,21 @@ func (b *billService) Delete(ctx context.Context, billId, userId, bookId int) er
 }
 
 // 保存账单，根据 bill.Id 是否为0判断是新增还是更新
-func (b *billService) save(ctx context.Context, bill *model.Bill) error {
+func (b *billService) save(ctx context.Context, bill *model.AccountFlow) error {
 	// 校验分类是否存在
-	err := b.checkCategory(ctx, bill.CategoryId, bill.BookId)
+	err := b.checkCategory(ctx, *bill.CategoryId, *bill.BookId)
 	if err != nil {
 		return err
 	}
 
 	// 校验账本是否存在
-	_, err = b.checkBook(ctx, bill.BookId)
+	_, err = b.checkBook(ctx, *bill.BookId)
 	if err != nil {
 		return err
 	}
 
 	// 校验用户是否是账本的成员
-	if err := b.checkUserInBook(ctx, bill.BookId, bill.UserId); err != nil {
+	if err := b.checkUserInBook(ctx, *bill.BookId, bill.UserId); err != nil {
 		return err
 	}
 
@@ -193,8 +172,8 @@ func (b *billService) save(ctx context.Context, bill *model.Bill) error {
 	}
 
 	// 校验账户是否存在
-	if bill.AssetId > 0 {
-		if _, err := b.checkAsset(ctx, bill.AssetId, bill.UserId); err != nil {
+	if bill.AccountId > 0 {
+		if _, err := b.checkAccount(ctx, bill.AccountId, bill.UserId); err != nil {
 			return err
 		}
 	}
@@ -220,20 +199,29 @@ func (b *billService) save(ctx context.Context, bill *model.Bill) error {
 				return err
 			}
 			diff = billBefore.Cost - bill.Cost
+			// 修改时，收入为差值取反
+			if bill.Type == constant.AccountTypeIncome {
+				diff = -diff
+			}
 			// 更新账单
-			err = b.billStore.Update(ctx, bill)
+			err = b.accountFlowStore.Update(ctx, bill)
 		} else {
 			// 插入账单
-			err = b.billStore.Add(ctx, bill)
-			diff = -bill.Cost
+			err = b.accountFlowStore.Add(ctx, bill)
+			diff = bill.Cost
+			// 支出
+			if bill.Type == constant.AccountTypeExpense {
+				diff = -diff
+			}
 		}
 		if err != nil {
 			return err
 		}
 
 		// 账户加减指定金额
-		if bill.AssetId > 0 {
-			if err := b.assetStore.ModifyBalance(ctx, bill.AssetId, diff); err != nil {
+		if bill.AccountId > 0 {
+
+			if err := b.accountStore.ModifyBalance(ctx, bill.AccountId, diff); err != nil {
 				return err
 			}
 		}
@@ -242,8 +230,8 @@ func (b *billService) save(ctx context.Context, bill *model.Bill) error {
 	})
 }
 
-func (b *billService) queryBillById(ctx context.Context, billId int) (*model.Bill, error) {
-	bill, err := b.billStore.QueryById(ctx, billId)
+func (b *billService) queryBillById(ctx context.Context, billId int) (*model.AccountFlow, error) {
+	bill, err := b.accountFlowStore.QueryById(ctx, billId)
 	if err != nil {
 		return nil, err
 	}
@@ -300,19 +288,19 @@ func (b *billService) checkUserInBook(ctx context.Context, bookId, userId int) e
 	return errno.New(errno.ErrIllegalOperate)
 }
 
-func (b *billService) checkAsset(ctx context.Context, assetId, userId int) (*model.Asset, error) {
-	asset, err := b.assetStore.QueryById(ctx, assetId)
+func (b *billService) checkAccount(ctx context.Context, accountId, userId int) (*model.Account, error) {
+	account, err := b.accountStore.QueryById(ctx, accountId)
 	if err != nil {
 		return nil, err
 	}
 
-	if asset == nil {
-		return nil, errno.New(errno.ErrAssetNotFound)
+	if account == nil {
+		return nil, errno.New(errno.ErrAccountNotFound)
 	}
 
-	if asset.UserId != userId {
+	if account.UserId != userId {
 		return nil, errno.New(errno.ErrIllegalOperate)
 	}
 
-	return asset, nil
+	return account, nil
 }

@@ -27,15 +27,15 @@ func (b *BillController) Update(c *gin.Context) {
 		return
 	}
 
-	bill := model.Bill{
+	bill := model.AccountFlow{
 		Id:         billId,
 		Cost:       req.Cost,
-		Type:       req.Type,
+		Type:       *req.Type,
 		Remark:     req.Remark,
 		RecordTime: req.RecordTime.Timestamp(),
-		AssetId:    req.AssetId,
-		CategoryId: req.CategoryId,
-		BookId:     bookId,
+		AccountId:  req.AccountId,
+		CategoryId: &req.CategoryId,
+		BookId:     &bookId,
 		UserId:     userId,
 	}
 

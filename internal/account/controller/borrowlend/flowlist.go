@@ -1,4 +1,4 @@
-package borrow
+package borrowlend
 
 import (
 	"kaixiao7/account/internal/account/controller"
@@ -8,15 +8,15 @@ import (
 )
 
 // FlowList 查询借入借出流水列表
-func (b *BorrowController) FlowList(c *gin.Context) {
+func (b *BorrowLendController) FlowList(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
-	assetFlowId, ok := controller.GetIntParamFromUrl(c, "assetFlowId")
+	accountFlowId, ok := controller.GetIntParamFromUrl(c, "accountFlowId")
 	if !ok {
 		return
 	}
 
-	list, err := b.borrowSrv.QueryBorrowFlowList(c, assetFlowId, userId)
+	list, err := b.borrowLendSrv.QueryBorrowLendFlowList(c, accountFlowId, userId)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return

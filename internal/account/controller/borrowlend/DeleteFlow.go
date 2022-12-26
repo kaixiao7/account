@@ -1,4 +1,4 @@
-package borrow
+package borrowlend
 
 import (
 	"kaixiao7/account/internal/account/controller"
@@ -8,7 +8,7 @@ import (
 )
 
 // DeleteFlow 删除借入借出流水（还款、收款）
-func (b *BorrowController) DeleteFlow(c *gin.Context) {
+func (b *BorrowLendController) DeleteFlow(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
 	flowId, ok := controller.GetIntParamFromUrl(c, "flowId")
@@ -16,7 +16,7 @@ func (b *BorrowController) DeleteFlow(c *gin.Context) {
 		return
 	}
 
-	if err := b.borrowSrv.DeleteBorrowFlow(c, flowId, userId); err != nil {
+	if err := b.borrowLendSrv.DeleteBorrowLendFlow(c, flowId, userId); err != nil {
 		core.WriteRespErr(c, err)
 		return
 	}

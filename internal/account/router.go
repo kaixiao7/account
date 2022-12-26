@@ -1,11 +1,11 @@
 package account
 
 import (
-	"kaixiao7/account/internal/account/controller/asset"
-	"kaixiao7/account/internal/account/controller/assetflow"
+	"kaixiao7/account/internal/account/controller/account"
+	"kaixiao7/account/internal/account/controller/accountflow"
 	"kaixiao7/account/internal/account/controller/bill"
 	"kaixiao7/account/internal/account/controller/book"
-	"kaixiao7/account/internal/account/controller/borrow"
+	"kaixiao7/account/internal/account/controller/borrowlend"
 	"kaixiao7/account/internal/account/controller/budget"
 	"kaixiao7/account/internal/account/controller/category"
 	"kaixiao7/account/internal/account/controller/statistic"
@@ -88,38 +88,38 @@ func installController(g *gin.Engine) {
 		tags.GET("", tagController.List)
 	}
 
-	assets := g.Group("/assets")
+	accounts := g.Group("/accounts")
 	{
-		assetController := asset.NewAssetController()
+		accountController := account.NewAccountController()
 
-		assets.GET("", assetController.List)
-		assets.POST("", assetController.Add)
-		assets.PUT(":assetId", assetController.Update)
-		assets.DELETE(":assetId", assetController.Delete)
-		// assets.POST("/flow", assetController.AddFlow)
+		accounts.GET("", accountController.List)
+		accounts.POST("", accountController.Add)
+		accounts.PUT(":accountId", accountController.Update)
+		accounts.DELETE(":accountId", accountController.Delete)
+		// accounts.POST("/flow", accountController.AddFlow)
 	}
 
-	assetFlows := g.Group("/assets/:assetId/flows")
+	accountFlows := g.Group("/accounts/:accountId/flows")
 	{
-		assetFlowController := assetflow.NewAssetFlowController()
+		accountFlowController := accountflow.NewAccountFlowController()
 
-		assetFlows.GET("", assetFlowController.List)
-		assetFlows.POST("", assetFlowController.Add)
-		// assetFlows.PUT(":assetFlowId", assetFlowController.Update)
-		assetFlows.DELETE(":assetFlowId", assetFlowController.Delete)
+		accountFlows.GET("", accountFlowController.List)
+		accountFlows.POST("", accountFlowController.Add)
+		// accountFlows.PUT(":accountFlowId", accountFlowController.Update)
+		accountFlows.DELETE(":accountFlowId", accountFlowController.Delete)
 	}
 
-	borrows := g.Group("/borrows")
+	borrows := g.Group("/borrowlends")
 	{
-		borrowController := borrow.NewBorrowController()
+		borrowController := borrowlend.NewBorrowController()
 
 		borrows.GET("", borrowController.List)
 		borrows.GET("/total", borrowController.Total)
 
-		borrows.GET("/:assetFlowId/flows", borrowController.FlowList)
-		borrows.POST("/:assetFlowId/flows", borrowController.AddFlow)
-		// borrows.PUT("/:assetFlowId/flows/:flowId", borrowController.UpdateFlow)
-		borrows.DELETE("/:assetFlowId/flows/:flowId", borrowController.DeleteFlow)
+		borrows.GET("/:accountFlowId/flows", borrowController.FlowList)
+		borrows.POST("/:accountFlowId/flows", borrowController.AddFlow)
+		// borrows.PUT("/:accountFlowId/flows/:flowId", borrowController.UpdateFlow)
+		borrows.DELETE("/:accountFlowId/flows/:flowId", borrowController.DeleteFlow)
 	}
 
 	statistics := g.Group("/statistics")
