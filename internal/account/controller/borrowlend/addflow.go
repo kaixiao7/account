@@ -1,4 +1,4 @@
-package borrow
+package borrowlend
 
 import (
 	"kaixiao7/account/internal/account/controller"
@@ -10,7 +10,7 @@ import (
 )
 
 type addFlowReq struct {
-	AssetId    int            `json:"asset_id" binding:"required,numeric"`
+	AccountId  int            `json:"account_id" binding:"required,numeric"`
 	Cost       float64        `json:"cost" binding:"required,numeric"`
 	RecordTime timex.JsonTime `json:"record_time" binding:"required"`
 	Type       int            `json:"type,omitempty" binding:"required,numeric"`
@@ -18,10 +18,10 @@ type addFlowReq struct {
 }
 
 // AddFlow 添加借入/借出流水(还款/收款)
-func (b *BorrowController) AddFlow(c *gin.Context) {
+func (b *BorrowLendController) AddFlow(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
-	assetFlowId, ok := controller.GetIntParamFromUrl(c, "assetFlowId")
+	accountFlowId, ok := controller.GetIntParamFromUrl(c, "accountFlowId")
 	if !ok {
 		return
 	}
@@ -32,15 +32,15 @@ func (b *BorrowController) AddFlow(c *gin.Context) {
 		return
 	}
 
-	flow := model.BorrowFlow{
-		BorrowId:   assetFlowId,
-		AssetId:    flowReq.AssetId,
+	flow := model.BorrowLendFlow{
+		BorrowId:   accountFlowId,
+		AccountId:  flowReq.AccountId,
 		Cost:       flowReq.Cost,
 		RecordTime: flowReq.RecordTime.Timestamp(),
 		Type:       flowReq.Type,
 		Remark:     flowReq.Remark,
 	}
-	if err := b.borrowSrv.AddBorrowFlow(c, &flow, userId); err != nil {
+	if err := b.borrowLendSrv.AddBorrowLendFlow(c, &flow, userId); err != nil {
 		core.WriteRespErr(c, err)
 		return
 	}

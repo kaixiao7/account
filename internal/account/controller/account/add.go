@@ -1,4 +1,4 @@
-package asset
+package account
 
 import (
 	"time"
@@ -10,20 +10,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (a *AssetController) Add(c *gin.Context) {
+func (a *AccountController) Add(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
-	var asset model.Asset
-	if err := c.ShouldBindJSON(&asset); err != nil {
+	var account model.Account
+	if err := c.ShouldBindJSON(&account); err != nil {
 		core.WriteRespErr(c, err)
 		return
 	}
 
-	asset.UserId = userId
-	asset.CreateTime = time.Now().Unix()
-	asset.UpdateTime = time.Now().Unix()
+	account.UserId = userId
+	account.CreateTime = time.Now().Unix()
+	account.UpdateTime = time.Now().Unix()
 
-	if err := a.assetSrv.Add(c, &asset); err != nil {
+	if err := a.accountSrv.Add(c, &account); err != nil {
 		core.WriteRespErr(c, err)
 		return
 	}

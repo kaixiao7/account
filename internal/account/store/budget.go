@@ -25,7 +25,7 @@ func NewBudgetStore() BudgetStore {
 // AddBudget 添加账本总预算
 func (b *budget) AddBudget(ctx context.Context, budget *model.Budget) error {
 	db := getDBFromContext(ctx)
-	sql := "insert into budget_setting(budget, book_id, type, category_id, create_id, create_time, update_time) values(?, ?, ?, ?, ?, ?, ?)"
+	sql := "insert into book_budget(budget, book_id, type, category_id, create_id, create_time, update_time) values(?, ?, ?, ?, ?, ?, ?)"
 
 	_, err := db.Exec(sql, budget.Budget, budget.BookId, budget.Type, budget.CategoryId, budget.CreateId, budget.CreateTime, budget.UpdateTime)
 	if err != nil {
@@ -38,7 +38,7 @@ func (b *budget) AddBudget(ctx context.Context, budget *model.Budget) error {
 // UpdateBudget 更新账本预算
 func (b *budget) UpdateBudget(ctx context.Context, budgetId int, budget float64, updateTime int64) error {
 	db := getDBFromContext(ctx)
-	sql := "update budget_setting set budget=?, update_time=? where id = ?"
+	sql := "update book_budget set budget=?, update_time=? where id = ?"
 
 	_, err := db.Exec(sql, budget, updateTime, budgetId)
 	if err != nil {
@@ -51,7 +51,7 @@ func (b *budget) UpdateBudget(ctx context.Context, budgetId int, budget float64,
 // QueryBudget 查询账本总预算
 func (b *budget) QueryBudget(ctx context.Context, bookId int) (*model.Budget, error) {
 	db := getDBFromContext(ctx)
-	querySql := "select * from budget_setting where book_id = ? and type = 0"
+	querySql := "select * from book_budget where book_id = ? and type = 0"
 
 	var budget model.Budget
 	err := db.Get(&budget, querySql, bookId)

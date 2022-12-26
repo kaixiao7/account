@@ -1,12 +1,11 @@
 package bill
 
 import (
-	"time"
+	"strconv"
 
 	"kaixiao7/account/internal/account/controller"
 	"kaixiao7/account/internal/pkg/core"
 	"kaixiao7/account/internal/pkg/errno"
-	"kaixiao7/account/internal/pkg/timex"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,23 +18,20 @@ func (b *BillController) List(c *gin.Context) {
 		return
 	}
 
-	date := c.Query("date")
-	// 如果没有传递参数，则默认为当前时间
-	if date == "" {
-		date = timex.Format(time.Now(), timex.DatePattern)
+	pageSize, err := strconv.Atoi(c.Query("pageSize"))
+	if err != nil {
+		pageSize = 100
 	}
-	// 时间转换
-	parseDate, err := timex.Parse(date, timex.DatePattern)
+	pageNum, err := strconv.Atoi(c.Query("pageNum"))
+	if err != nil {
+		pageNum = 1
+	}
+
+	ret, err := b.billSrv.QueryByPage(c, bookId, userId, pageSize, pageNum)
 	if err != nil {
 		core.WriteRespErr(c, errno.New(errno.ErrValidation))
 		return
 	}
 
-	bills, err := b.billSrv.QueryByTime(c, bookId, userId, parseDate)
-	if err != nil {
-		core.WriteRespErr(c, err)
-		return
-	}
-
-	core.WriteRespSuccess(c, bills)
+	core.WriteRespSuccess(c, ret)
 }

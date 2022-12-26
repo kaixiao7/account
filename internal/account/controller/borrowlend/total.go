@@ -1,4 +1,4 @@
-package asset
+package borrowlend
 
 import (
 	"kaixiao7/account/internal/account/controller"
@@ -7,14 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (a *AssetController) List(c *gin.Context) {
+func (b *BorrowLendController) Total(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
-	assets, err := a.assetSrv.QueryByUserId(c, userId)
+	total, err := b.borrowLendSrv.QueryTotal(c, userId)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return
 	}
 
-	core.WriteRespSuccess(c, assets)
+	core.WriteRespSuccess(c, total)
 }

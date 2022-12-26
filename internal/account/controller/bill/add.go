@@ -11,10 +11,10 @@ import (
 
 type billReq struct {
 	Cost       float64        `json:"cost,omitempty" binding:"required,numeric"`
-	Type       *int8          `json:"type,omitempty" binding:"required,gte=0,lte=1"`
+	Type       *int           `json:"type,omitempty" binding:"required,gte=0,lte=1"`
 	Remark     string         `json:"remark,omitempty" binding:"required,max=200"`
 	RecordTime timex.JsonTime `json:"record_time" binding:"required"`
-	AssetId    int            `json:"asset_id,omitempty" binding:"required,numeric"`
+	AccountId  int            `json:"account_id,omitempty" binding:"required,numeric"`
 	CategoryId int            `json:"category_id,omitempty" binding:"required,min=1"`
 }
 
@@ -31,14 +31,14 @@ func (b *BillController) Add(c *gin.Context) {
 		return
 	}
 
-	bill := model.Bill{
+	bill := model.AccountFlow{
 		Cost:       req.Cost,
-		Type:       req.Type,
+		Type:       *req.Type,
 		Remark:     req.Remark,
 		RecordTime: req.RecordTime.Timestamp(),
-		AssetId:    req.AssetId,
-		CategoryId: req.CategoryId,
-		BookId:     bookId,
+		AccountId:  req.AccountId,
+		CategoryId: &req.CategoryId,
+		BookId:     &bookId,
 		UserId:     userId,
 	}
 	err := b.billSrv.Add(c, &bill)

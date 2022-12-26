@@ -26,10 +26,10 @@ var (
 	ErrBillNotDelete = &Errno{Code: 10403, Message: "不允许删除他人账单"}
 	ErrBillNotModify = &Errno{Code: 10403, Message: "不允许修改他人账单"}
 
-	ErrAssetNotFound = &Errno{Code: 10501, Message: "账户不存在"}
+	ErrAccountNotFound = &Errno{Code: 10501, Message: "账户不存在"}
 
-	ErrAssetFlowNotFound     = &Errno{Code: 10601, Message: "流水不存在"}
-	ErrAssetFlowAssociateNil = &Errno{Code: 10602, Message: "对方名称不能为空"}
+	ErrAccountFlowNotFound     = &Errno{Code: 10601, Message: "流水不存在"}
+	ErrAccountFlowAssociateNil = &Errno{Code: 10602, Message: "对方名称不能为空"}
 
 	ErrBorrowFlowNotFound = &Errno{Code: 10701, Message: "流水不存在"}
 )

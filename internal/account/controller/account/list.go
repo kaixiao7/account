@@ -1,4 +1,4 @@
-package borrow
+package account
 
 import (
 	"kaixiao7/account/internal/account/controller"
@@ -7,14 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (b *BorrowController) Total(c *gin.Context) {
+func (a *AccountController) List(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
-	total, err := b.borrowSrv.QueryTotal(c, userId)
+	accounts, err := a.accountSrv.QueryByUserId(c, userId)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return
 	}
 
-	core.WriteRespSuccess(c, total)
+	core.WriteRespSuccess(c, accounts)
 }

@@ -1,4 +1,4 @@
-package asset
+package accountflow
 
 import (
 	"kaixiao7/account/internal/account/controller"
@@ -7,16 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (a *AssetController) Delete(c *gin.Context) {
-
+func (af *AccountFlowController) Delete(c *gin.Context) {
 	userId := controller.GetUserId(c)
-
-	assetId, exist := controller.GetIntParamFromUrl(c, "assetId")
-	if !exist {
+	accountFlowId, ok := controller.GetIntParamFromUrl(c, "accountFlowId")
+	if !ok {
 		return
 	}
 
-	err := a.assetSrv.Delete(c, assetId, userId)
+	err := af.accountFlowSrv.Delete(c, accountFlowId, userId)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return

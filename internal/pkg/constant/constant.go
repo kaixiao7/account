@@ -18,30 +18,30 @@ const (
 )
 
 const (
-	// AssetTypeExpense 资产类型 支出
-	AssetTypeExpense = iota
+	// AccountTypeExpense 账户类型 支出
+	AccountTypeExpense = iota
 
-	// AssetTypeIncome 资产类型 收入
-	AssetTypeIncome
+	// AccountTypeIncome 账户类型 收入
+	AccountTypeIncome
 
-	// AssetTypeTransferIn 资产类型 转入
-	AssetTypeTransferIn
+	// AccountTypeTransferIn 账户类型 转入
+	AccountTypeTransferIn
 
-	// AssetTypeTransferOut 资产类型 转出
-	AssetTypeTransferOut
+	// AccountTypeTransferOut 账户类型 转出
+	AccountTypeTransferOut
 
-	// AssetTypeBorrowIn 资产类型 借入
-	AssetTypeBorrowIn
+	// AccountTypeBorrow 账户类型 借入
+	AccountTypeBorrow
 
-	// AssetTypeBorrowOut 资产类型 借出
-	AssetTypeBorrowOut
+	// AccountTypeLend 账户类型 借出
+	AccountTypeLend
 
-	// AssetTypeModify 资产类型 修改余额
-	AssetTypeModify
+	// AccountTypeModify 账户类型 修改余额
+	AccountTypeModify
 
-	// AssetTypeStill 资产类型 还款
-	AssetTypeStill
+	// AccountTypeStill 账户类型 还款
+	AccountTypeStill
 
-	// AssetTypeHarvest 资产类型 收款
-	AssetTypeHarvest
+	// AccountTypeHarvest 账户类型 收款
+	AccountTypeHarvest
 )

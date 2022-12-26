@@ -1,4 +1,4 @@
-package borrow
+package borrowlend
 
 import (
 	"strconv"
@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (b *BorrowController) List(c *gin.Context) {
+func (b *BorrowLendController) List(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
 	borrowType := c.Query("type")
@@ -20,7 +20,7 @@ func (b *BorrowController) List(c *gin.Context) {
 		return
 	}
 
-	list, err := b.borrowSrv.QueryBorrowList(c, userId, borrowTypeNum)
+	list, err := b.borrowLendSrv.QueryBorrowLendList(c, userId, borrowTypeNum)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return
