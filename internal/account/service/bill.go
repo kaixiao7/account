@@ -8,7 +8,6 @@ import (
 	"kaixiao7/account/internal/account/store"
 	"kaixiao7/account/internal/pkg/constant"
 	"kaixiao7/account/internal/pkg/errno"
-	"kaixiao7/account/internal/pkg/log"
 )
 
 type BillSrv interface {
@@ -274,17 +273,17 @@ func (b *billService) checkBook(ctx context.Context, bookId int) (*model.Book, e
 // 校验账本成员是否包含指定用户
 // 如果包含，则返回nil，否则返回具体错误信息
 func (b *billService) checkUserInBook(ctx context.Context, bookId, userId int) error {
-	memberIds, err := b.bookStore.QueryBookMember(ctx, bookId)
-	if err != nil {
-		return err
-	}
-	for _, id := range memberIds {
-		if id == userId {
-			return nil
-		}
-	}
-
-	log.Errorf("用户 %d 不是账本 %d 的成员", userId, bookId)
+	// memberIds, err := b.bookStore.QueryBookMember(ctx, bookId)
+	// if err != nil {
+	// 	return err
+	// }
+	// for _, id := range memberIds {
+	// 	if id == userId {
+	// 		return nil
+	// 	}
+	// }
+	//
+	// log.Errorf("用户 %d 不是账本 %d 的成员", userId, bookId)
 	return errno.New(errno.ErrIllegalOperate)
 }
 

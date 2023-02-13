@@ -11,6 +11,11 @@ import (
 )
 
 type AccountSrv interface {
+	// Push 客户端向服务端推送数据
+	Push(ctx context.Context, accounts []*model.Account, syncTime int64) error
+	// Pull 客户端从服务端拉取数据
+	Pull(ctx context.Context, userId int, lastSyncTime int64) ([]model.Account, error)
+
 	// Add 添加资产账户
 	Add(ctx context.Context, account *model.Account) error
 	// Update 修改资产账户
@@ -31,6 +36,34 @@ func NewAccountSrv() AccountSrv {
 		accountStore:     store.NewAccountStore(),
 		accountFlowStore: store.NewAccountFlowStore(),
 	}
+}
+
+// Push 客户端向服务端推送数据
+func (a *accountService) Push(ctx context.Context, accounts []*model.Account, syncTime int64) error {
+
+	return WithTransaction(ctx, func(ctx context.Context) error {
+		for _, account := range accounts {
+			account.SyncTime = syncTime
+			if account.SyncState == constant.SYNC_ADD {
+				account.SyncState = constant.SYNC_SUCCESS
+				if e := a.accountStore.Add(ctx, account); e != nil {
+					return e
+				}
+			} else {
+				account.SyncState = constant.SYNC_SUCCESS
+				if e := a.accountStore.Update(ctx, account); e != nil {
+					return e
+				}
+			}
+		}
+
+		return nil
+	})
+}
+
+// Pull 客户端从服务端拉取数据
+func (a *accountService) Pull(ctx context.Context, userId int, lastSyncTime int64) ([]model.Account, error) {
+	return a.accountStore.QueryBySyncTime(ctx, userId, lastSyncTime)
 }
 
 // Add 添加资产账户

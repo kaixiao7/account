@@ -26,9 +26,21 @@ func GetUserId(c *gin.Context) int {
 func GetIntParamFromUrl(c *gin.Context, paramName string) (int, bool) {
 	bookId, err := strconv.Atoi(c.Param(paramName))
 	if err != nil {
-		core.WriteRespErr(c, errno.New(errno.ErrPageNotFound))
+		core.WriteRespErr(c, errno.New(errno.ErrValidation))
 		return 0, false
 	}
 
 	return bookId, true
+}
+
+// GetInt64ParamFromParam 从请求路径中获取指定的int64类型参数
+func GetInt64ParamFromParam(c *gin.Context, paramName string) (int64, bool) {
+	param := c.Query(paramName)
+	ret, err := strconv.ParseInt(param, 10, 64)
+	if err != nil {
+		core.WriteRespErr(c, errno.New(errno.ErrValidation))
+		return 0, false
+	}
+
+	return ret, true
 }

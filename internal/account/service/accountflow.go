@@ -15,6 +15,13 @@ type AccountFlowSrv interface {
 	// Update 修改流水
 	// 仅修改基本信息，不会修改类型及账户
 	Update(ctx context.Context, accountFlow *model.AccountFlow) error
+
+	Push(ctx context.Context, flows []*model.AccountFlow, syncTime int64) error
+	// PullBook 客户端从服务端拉取账本数据
+	PullBook(ctx context.Context, bookId int, lastSyncTime int64, pageNum int) (model.Page, error)
+	// PullOther 客户端从服务拉取除账本外的其他流水
+	PullOther(ctx context.Context, userId int, lastSyncTime int64) ([]*model.AccountFlow, error)
+
 	// Delete 删除流水
 	Delete(ctx context.Context, accountFlowId, userId int) error
 
@@ -32,6 +39,67 @@ func NewAccountFlowSrv() AccountFlowSrv {
 		accountStore:     store.NewAccountStore(),
 		accountFlowStore: store.NewAccountFlowStore(),
 	}
+}
+
+func (af *accountFlowService) Push(ctx context.Context, flows []*model.AccountFlow, syncTime int64) error {
+	return WithTransaction(ctx, func(ctx context.Context) error {
+		for _, flow := range flows {
+			flow.SyncTime = syncTime
+			if flow.SyncState == constant.SYNC_ADD {
+				flow.SyncState = constant.SYNC_SUCCESS
+				if e := af.accountFlowStore.Add(ctx, flow); e != nil {
+					return e
+				}
+			} else {
+				flow.SyncState = constant.SYNC_SUCCESS
+				if e := af.accountFlowStore.Update(ctx, flow); e != nil {
+					return e
+				}
+			}
+		}
+
+		return nil
+	})
+}
+
+// PullBook 客户端从服务端拉取账本数据
+func (af *accountFlowService) PullBook(ctx context.Context, bookId int, lastSyncTime int64, pageNum int) (model.Page, error) {
+	pageSize := 1000
+	count, err := af.accountFlowStore.QueryByBookSyncTimeCount(ctx, bookId, lastSyncTime)
+	if err != nil {
+		return model.Page{}, err
+	}
+
+	// 计算总页数
+	var total int
+	if count%pageSize == 0 {
+		total = count / pageSize
+	} else {
+		total = count/pageSize + 1
+	}
+	ret := model.Page{
+		Total:    total,
+		PageSize: pageSize,
+		PageNum:  pageNum,
+	}
+
+	if total < pageNum {
+		return ret, nil
+	}
+
+	flows, err := af.accountFlowStore.QueryByBookSyncTime(ctx, bookId, lastSyncTime, pageNum, pageSize)
+	if err != nil {
+		return model.Page{}, err
+	}
+
+	ret.Data = flows
+
+	return ret, nil
+}
+
+// PullOther 客户端从服务拉取除账本外的其他流水
+func (af *accountFlowService) PullOther(ctx context.Context, userId int, lastSyncTime int64) ([]*model.AccountFlow, error) {
+	return af.accountFlowStore.QueryByUserIdSyncTime(ctx, userId, lastSyncTime)
 }
 
 // Add 添加流水
