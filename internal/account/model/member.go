@@ -1,10 +1,10 @@
 package model
 
-type Book struct {
+type Member struct {
 	Id         int    `db:"id" json:"id"`
-	BookName   string `db:"book_name" json:"book_name"`
+	BookId     string `db:"book_id" json:"book_id"`
 	UserId     int    `db:"user_id" json:"user_id"`
-	Cover      string `db:"cover" json:"cover"`
+	Username   string `db:"username" json:"username"`
 	DelFlag    int    `db:"del_flag" json:"del_flag"`
 	SyncState  int    `db:"sync_state" json:"sync_state"`
 	SyncTime   int64  `db:"sync_time" json:"sync_time"`

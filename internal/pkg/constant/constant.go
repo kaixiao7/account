@@ -45,3 +45,10 @@ const (
 	// AccountTypeHarvest 账户类型 收款
 	AccountTypeHarvest
 )
+
+// 0-新增，1-修改，2-已同步
+const (
+	SYNC_ADD = iota
+	SYNC_UPDATE
+	SYNC_SUCCESS
+)

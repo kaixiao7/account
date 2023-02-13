@@ -9,8 +9,10 @@ type Account struct {
 	Init        float64 `db:"init" json:"-"`
 	Icon        string  `db:"icon" json:"icon" binding:"required"`
 	Del         int     `db:"del" json:"-"`
-	IsTotal     int     `db:"is_total" json:"is_total" binding:"required"`
+	IsTotal     *int    `db:"is_total" json:"is_total" binding:"required"`
 	Remark      string  `db:"remark" json:"remark,omitempty" binding:"max=200"`
+	SyncState   int     `db:"sync_state" json:"sync_state"`
+	SyncTime    int64   `db:"sync_time" json:"sync_time"`
 	CreateTime  int64   `db:"create_time" json:"create_time,omitempty"`
 	UpdateTime  int64   `db:"update_time" json:"update_time,omitempty"`
 }
