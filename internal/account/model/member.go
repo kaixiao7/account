@@ -1,9 +1,9 @@
 package model
 
 type Member struct {
-	Id         int    `db:"id" json:"id"`
-	BookId     string `db:"book_id" json:"book_id"`
-	UserId     int    `db:"user_id" json:"user_id"`
+	Id         int64  `db:"id" json:"id"`
+	BookId     int64  `db:"book_id" json:"book_id"`
+	UserId     int64  `db:"user_id" json:"user_id"`
 	Username   string `db:"username" json:"username"`
 	DelFlag    int    `db:"del_flag" json:"del_flag"`
 	SyncState  int    `db:"sync_state" json:"sync_state"`

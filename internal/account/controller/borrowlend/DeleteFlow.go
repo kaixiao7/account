@@ -11,7 +11,7 @@ import (
 func (b *BorrowLendController) DeleteFlow(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
-	flowId, ok := controller.GetIntParamFromUrl(c, "flowId")
+	flowId, ok := controller.GetInt64ParamFromUrl(c, "flowId")
 	if !ok {
 		return
 	}

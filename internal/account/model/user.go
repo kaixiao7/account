@@ -1,7 +1,7 @@
 package model
 
 type User struct {
-	Id           int    `db:"id" json:"id"`
+	Id           int64  `db:"id" json:"id"`
 	Username     string `db:"username" json:"username"`           // 用户名
 	Phone        string `db:"phone" json:"phone"`                 // 手机号
 	WxId         string `db:"wx_id" json:"wx_id"`                 // 微信id

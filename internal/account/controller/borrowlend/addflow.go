@@ -10,7 +10,7 @@ import (
 )
 
 type addFlowReq struct {
-	AccountId  int            `json:"account_id" binding:"required,numeric"`
+	AccountId  int64          `json:"account_id" binding:"required,numeric"`
 	Cost       float64        `json:"cost" binding:"required,numeric"`
 	RecordTime timex.JsonTime `json:"record_time" binding:"required"`
 	Type       int            `json:"type,omitempty" binding:"required,numeric"`
@@ -21,7 +21,7 @@ type addFlowReq struct {
 func (b *BorrowLendController) AddFlow(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
-	accountFlowId, ok := controller.GetIntParamFromUrl(c, "accountFlowId")
+	accountFlowId, ok := controller.GetInt64ParamFromUrl(c, "accountFlowId")
 	if !ok {
 		return
 	}

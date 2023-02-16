@@ -13,9 +13,9 @@ type MemberStore interface {
 
 	Update(ctx context.Context, member *model.Member) error
 
-	QueryBySyncTime(ctx context.Context, bookId int, syncTime int64) ([]*model.Member, error)
+	QueryBySyncTime(ctx context.Context, bookId int64, syncTime int64) ([]*model.Member, error)
 
-	QueryByBookId(ctx context.Context, bookId int) ([]*model.Member, error)
+	QueryByBookId(ctx context.Context, bookId int64) ([]*model.Member, error)
 }
 
 type member struct {
@@ -51,7 +51,7 @@ func (m *member) Update(ctx context.Context, member *model.Member) error {
 	return nil
 }
 
-func (m *member) QueryBySyncTime(ctx context.Context, bookId int, syncTime int64) ([]*model.Member, error) {
+func (m *member) QueryBySyncTime(ctx context.Context, bookId int64, syncTime int64) ([]*model.Member, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := `select * from book_member where book_id = ? and sync_time > ?`
@@ -66,7 +66,7 @@ func (m *member) QueryBySyncTime(ctx context.Context, bookId int, syncTime int64
 	return memberList, nil
 }
 
-func (m *member) QueryByBookId(ctx context.Context, bookId int) ([]*model.Member, error) {
+func (m *member) QueryByBookId(ctx context.Context, bookId int64) ([]*model.Member, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := `select * from book_member where book_id = ?`

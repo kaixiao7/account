@@ -40,7 +40,7 @@ var (
 
 // Parse 解析token字符串
 // 返回 tokenType 与 identity 的值
-func Parse(tokenStr string) (string, int, error) {
+func Parse(tokenStr string) (string, int64, error) {
 	// parse token
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -61,15 +61,15 @@ func Parse(tokenStr string) (string, int, error) {
 		tokenType = claims[cfg.typeKey].(string)
 	}
 
-	ret, _ := strconv.Atoi(identity)
+	ret, _ := strconv.ParseInt(identity, 10, 64)
 	return tokenType, ret, nil
 }
 
 // Sign 生成jwt令牌
-func Sign(tokenType string, identity int, expire int64) (string, error) {
+func Sign(tokenType string, identity int64, expire int64) (string, error) {
 	now := time.Now()
 	claims := jwt.MapClaims{
-		cfg.identityKey: strconv.Itoa(identity),
+		cfg.identityKey: strconv.FormatInt(identity, 10),
 		cfg.typeKey:     tokenType,
 		"nbf":           now.Unix(),                                          // 生效时间
 		"iat":           now.Unix(),                                          // 签发时间
@@ -82,18 +82,18 @@ func Sign(tokenType string, identity int, expire int64) (string, error) {
 }
 
 // GenerateAccessToken 生成accessToken
-func GenerateAccessToken(identity int) (string, error) {
+func GenerateAccessToken(identity int64) (string, error) {
 	return Sign(AccessTokenType, identity, cfg.accessExpire)
 }
 
 // GenerateRefreshToken 生成refreshToken
-func GenerateRefreshToken(identity int) (string, error) {
+func GenerateRefreshToken(identity int64) (string, error) {
 	return Sign(RefreshTokenType, identity, cfg.refreshExpire)
 }
 
 // DecodeAccessToken 解码accessToken
 // 返回identity
-func DecodeAccessToken(token string) (int, error) {
+func DecodeAccessToken(token string) (int64, error) {
 	tokenType, identity, err := Parse(token)
 	if err != nil {
 		return 0, err
@@ -107,7 +107,7 @@ func DecodeAccessToken(token string) (int, error) {
 
 // DecodeRefreshToken 解码refreshToken
 // 返回identity
-func DecodeRefreshToken(token string) (int, error) {
+func DecodeRefreshToken(token string) (int64, error) {
 	tokenType, identity, err := Parse(token)
 	if err != nil {
 		return 0, err

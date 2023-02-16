@@ -11,7 +11,7 @@ func (a *AccountController) Delete(c *gin.Context) {
 
 	userId := controller.GetUserId(c)
 
-	accountId, exist := controller.GetIntParamFromUrl(c, "accountId")
+	accountId, exist := controller.GetInt64ParamFromUrl(c, "accountId")
 	if !exist {
 		return
 	}

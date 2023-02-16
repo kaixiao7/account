@@ -19,38 +19,38 @@ type AccountFlow interface {
 	Update(ctx context.Context, flow *model.AccountFlow) error
 
 	// QueryByBookSyncTimeCount 根据同步时间查询账本的流水记录总数
-	QueryByBookSyncTimeCount(ctx context.Context, bookId int, syncTime int64) (int, error)
+	QueryByBookSyncTimeCount(ctx context.Context, bookId int64, syncTime int64) (int, error)
 	// QueryByBookSyncTime 根据同步时间查询账本的流水记录
-	QueryByBookSyncTime(ctx context.Context, bookId int, syncTime int64, pageNum, pageSize int) ([]*model.AccountFlow, error)
+	QueryByBookSyncTime(ctx context.Context, bookId int64, syncTime int64, pageNum, pageSize int) ([]*model.AccountFlow, error)
 	// QueryByUserIdSyncTime 根据用户id及同步时间查询流水记录，不包括账本的记录
-	QueryByUserIdSyncTime(ctx context.Context, userId int, syncTime int64) ([]*model.AccountFlow, error)
+	QueryByUserIdSyncTime(ctx context.Context, userId int64, syncTime int64) ([]*model.AccountFlow, error)
 
 	// Delete 删除账户流水
 	// 逻辑删除，将字段del置为1
-	Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, id int64) error
 	// DeleteByAccountId 根据资产删除其对应的流水
 	// 逻辑删除，将字段del置为1
-	DeleteByAccountId(ctx context.Context, accountId int) error
+	DeleteByAccountId(ctx context.Context, accountId int64) error
 
 	// FinishedBorrow 结束债务
-	FinishedBorrow(ctx context.Context, accountId int) error
+	FinishedBorrow(ctx context.Context, accountId int64) error
 
 	// QueryById 根据id查询
-	QueryById(ctx context.Context, id int) (*model.AccountFlow, error)
+	QueryById(ctx context.Context, id int64) (*model.AccountFlow, error)
 
-	QueryByBookIdCount(ctx context.Context, bookId int) (int, error)
-	QueryByBookIdPage(ctx context.Context, bookId, pageNum, pageSize int) ([]model.AccountFlow, error)
+	QueryByBookIdCount(ctx context.Context, bookId int64) (int, error)
+	QueryByBookIdPage(ctx context.Context, bookId int64, pageNum, pageSize int) ([]model.AccountFlow, error)
 
 	// QueryByBorrowLendId 根据借贷id查询流水
-	QueryByBorrowLendId(ctx context.Context, borrowLendId int) ([]model.AccountFlow, error)
+	QueryByBorrowLendId(ctx context.Context, borrowLendId int64) ([]model.AccountFlow, error)
 
 	// QueryByUserIdAndType 根据userId与类型查询
-	QueryByUserIdAndType(ctx context.Context, userId, blType int) ([]model.AccountFlow, error)
+	QueryByUserIdAndType(ctx context.Context, userId int64, blType int) ([]model.AccountFlow, error)
 
 	// QueryBillTag 查询账单的标签备注
-	QueryBillTag(ctx context.Context, bookId int) ([]model.BillTag, error)
+	QueryBillTag(ctx context.Context, bookId int64) ([]model.BillTag, error)
 
-	QueryByAccountId(ctx context.Context, accountId int) ([]model.AccountFlow, error)
+	QueryByAccountId(ctx context.Context, accountId int64) ([]model.AccountFlow, error)
 }
 
 type accountFlow struct {
@@ -94,7 +94,7 @@ func (af *accountFlow) Update(ctx context.Context, flow *model.AccountFlow) erro
 }
 
 // QueryByBookSyncTimeCount 根据同步时间查询账本的流水记录总数
-func (af *accountFlow) QueryByBookSyncTimeCount(ctx context.Context, bookId int, syncTime int64) (int, error) {
+func (af *accountFlow) QueryByBookSyncTimeCount(ctx context.Context, bookId int64, syncTime int64) (int, error) {
 	db := getDBFromContext(ctx)
 
 	// 查询总记录数
@@ -107,7 +107,7 @@ func (af *accountFlow) QueryByBookSyncTimeCount(ctx context.Context, bookId int,
 }
 
 // QueryByBookSyncTime 根据同步时间分页查询账本的流水记录
-func (af *accountFlow) QueryByBookSyncTime(ctx context.Context, bookId int, syncTime int64, pageNum, pageSize int) ([]*model.AccountFlow, error) {
+func (af *accountFlow) QueryByBookSyncTime(ctx context.Context, bookId int64, syncTime int64, pageNum, pageSize int) ([]*model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from account_flow where book_id = ? and sync_time > ? limit ?, ?"
@@ -124,7 +124,7 @@ func (af *accountFlow) QueryByBookSyncTime(ctx context.Context, bookId int, sync
 }
 
 // QueryByUserIdSyncTime 根据用户id及同步时间查询流水记录，不包括账本的记录
-func (af *accountFlow) QueryByUserIdSyncTime(ctx context.Context, userId int, syncTime int64) ([]*model.AccountFlow, error) {
+func (af *accountFlow) QueryByUserIdSyncTime(ctx context.Context, userId int64, syncTime int64) ([]*model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from account_flow where user_id = ? and book_id = 0 and sync_time > ? "
@@ -142,7 +142,7 @@ func (af *accountFlow) QueryByUserIdSyncTime(ctx context.Context, userId int, sy
 
 // Delete 删除账户流水
 // 逻辑删除，将字段del置为1
-func (af *accountFlow) Delete(ctx context.Context, id int) error {
+func (af *accountFlow) Delete(ctx context.Context, id int64) error {
 	db := getDBFromContext(ctx)
 
 	deleteSql := "update account_flow set del_flag = ? where id = ?"
@@ -155,7 +155,7 @@ func (af *accountFlow) Delete(ctx context.Context, id int) error {
 
 // DeleteByAccountId 根据资产删除其对应的流水
 // 逻辑删除，将字段del置为1
-func (af *accountFlow) DeleteByAccountId(ctx context.Context, accountId int) error {
+func (af *accountFlow) DeleteByAccountId(ctx context.Context, accountId int64) error {
 	db := getDBFromContext(ctx)
 
 	deleteSql := "update account_flow set del_flag = ? where account_id =?"
@@ -167,7 +167,7 @@ func (af *accountFlow) DeleteByAccountId(ctx context.Context, accountId int) err
 }
 
 // QueryById 根据id查询
-func (af *accountFlow) QueryById(ctx context.Context, id int) (*model.AccountFlow, error) {
+func (af *accountFlow) QueryById(ctx context.Context, id int64) (*model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from account_flow where id = ? and del_flag =?"
@@ -184,7 +184,7 @@ func (af *accountFlow) QueryById(ctx context.Context, id int) (*model.AccountFlo
 }
 
 // QueryByBookIdCount 根据bookId分页查询的总记录数
-func (af *accountFlow) QueryByBookIdCount(ctx context.Context, bookId int) (int, error) {
+func (af *accountFlow) QueryByBookIdCount(ctx context.Context, bookId int64) (int, error) {
 	db := getDBFromContext(ctx)
 
 	// 查询总记录数
@@ -197,7 +197,7 @@ func (af *accountFlow) QueryByBookIdCount(ctx context.Context, bookId int) (int,
 }
 
 // QueryByBookIdPage 根据bookId分页查询
-func (af *accountFlow) QueryByBookIdPage(ctx context.Context, bookId, pageNum, pageSize int) ([]model.AccountFlow, error) {
+func (af *accountFlow) QueryByBookIdPage(ctx context.Context, bookId int64, pageNum, pageSize int) ([]model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from account_flow where book_id = ? and del_flag = ? limit ?, ?"
@@ -214,7 +214,7 @@ func (af *accountFlow) QueryByBookIdPage(ctx context.Context, bookId, pageNum, p
 }
 
 // QueryByAccountId 根据accountId查询
-func (af *accountFlow) QueryByAccountId(ctx context.Context, accountId int) ([]model.AccountFlow, error) {
+func (af *accountFlow) QueryByAccountId(ctx context.Context, accountId int64) ([]model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from account_flow where (account_id = ? or target_account_id = ?) and del_flag = ? "
@@ -231,7 +231,7 @@ func (af *accountFlow) QueryByAccountId(ctx context.Context, accountId int) ([]m
 }
 
 // QueryByBorrowLendId 根据借贷id查询流水
-func (af *accountFlow) QueryByBorrowLendId(ctx context.Context, borrowLendId int) ([]model.AccountFlow, error) {
+func (af *accountFlow) QueryByBorrowLendId(ctx context.Context, borrowLendId int64) ([]model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 	querySql := "select * from account_flow where borrow_lend_id = ? and del_flag = ?"
 
@@ -247,7 +247,7 @@ func (af *accountFlow) QueryByBorrowLendId(ctx context.Context, borrowLendId int
 }
 
 // QueryByUserIdAndType 根据userId与类型查询
-func (af *accountFlow) QueryByUserIdAndType(ctx context.Context, userId, blType int) ([]model.AccountFlow, error) {
+func (af *accountFlow) QueryByUserIdAndType(ctx context.Context, userId int64, blType int) ([]model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 	querySql := "select * from account_flow where user_id = ? and type = ? and del_flag = ?"
 
@@ -263,7 +263,7 @@ func (af *accountFlow) QueryByUserIdAndType(ctx context.Context, userId, blType 
 }
 
 // QueryBillTag 查询账单的标签备注
-func (af *accountFlow) QueryBillTag(ctx context.Context, bookId int) ([]model.BillTag, error) {
+func (af *accountFlow) QueryBillTag(ctx context.Context, bookId int64) ([]model.BillTag, error) {
 	db := getDBFromContext(ctx)
 
 	t := strconv.Itoa(constant.AccountTypeExpense) + "," + strconv.Itoa(constant.AccountTypeIncome)
@@ -287,7 +287,7 @@ func (af *accountFlow) QueryBillTag(ctx context.Context, bookId int) ([]model.Bi
 }
 
 // FinishedBorrow 结束债务
-func (af *accountFlow) FinishedBorrow(ctx context.Context, accountId int) error {
+func (af *accountFlow) FinishedBorrow(ctx context.Context, accountId int64) error {
 	db := getDBFromContext(ctx)
 
 	sql := "update account_flow set finished = ? where account_id = ?"

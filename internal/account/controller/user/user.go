@@ -16,7 +16,7 @@ func NewUserController() *UserController {
 	return &UserController{userSrv: service.NewUserSrv()}
 }
 
-func generateTokens(userId int) (*Tokens, error) {
+func generateTokens(userId int64) (*Tokens, error) {
 
 	accessToken, err := token.GenerateAccessToken(userId)
 	if err != nil {

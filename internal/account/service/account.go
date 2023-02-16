@@ -14,16 +14,16 @@ type AccountSrv interface {
 	// Push 客户端向服务端推送数据
 	Push(ctx context.Context, accounts []*model.Account, syncTime int64) error
 	// Pull 客户端从服务端拉取数据
-	Pull(ctx context.Context, userId int, lastSyncTime int64) ([]model.Account, error)
+	Pull(ctx context.Context, userId int64, lastSyncTime int64) ([]model.Account, error)
 
 	// Add 添加资产账户
 	Add(ctx context.Context, account *model.Account) error
 	// Update 修改资产账户
 	Update(ctx context.Context, account *model.Account) error
 	// Delete 删除资产账户
-	Delete(ctx context.Context, accountId, userId int) error
+	Delete(ctx context.Context, accountId, userId int64) error
 	// QueryByUserId 根据用户id查询所有资产账户
-	QueryByUserId(ctx context.Context, userId int) ([]model.Account, error)
+	QueryByUserId(ctx context.Context, userId int64) ([]model.Account, error)
 }
 
 type accountService struct {
@@ -62,7 +62,7 @@ func (a *accountService) Push(ctx context.Context, accounts []*model.Account, sy
 }
 
 // Pull 客户端从服务端拉取数据
-func (a *accountService) Pull(ctx context.Context, userId int, lastSyncTime int64) ([]model.Account, error) {
+func (a *accountService) Pull(ctx context.Context, userId int64, lastSyncTime int64) ([]model.Account, error) {
 	return a.accountStore.QueryBySyncTime(ctx, userId, lastSyncTime)
 }
 
@@ -115,7 +115,7 @@ func (a *accountService) Update(ctx context.Context, account *model.Account) err
 }
 
 // Delete 删除资产账户
-func (a *accountService) Delete(ctx context.Context, accountId, userId int) error {
+func (a *accountService) Delete(ctx context.Context, accountId, userId int64) error {
 	account, err := a.accountStore.QueryById(ctx, accountId)
 	if err != nil {
 		return err
@@ -140,6 +140,6 @@ func (a *accountService) Delete(ctx context.Context, accountId, userId int) erro
 }
 
 // QueryByUserId 根据用户id查询所有资产账户
-func (a *accountService) QueryByUserId(ctx context.Context, userId int) ([]model.Account, error) {
+func (a *accountService) QueryByUserId(ctx context.Context, userId int64) ([]model.Account, error) {
 	return a.accountStore.QueryAllByUserId(ctx, userId)
 }

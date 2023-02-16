@@ -3,13 +3,12 @@ package store
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"kaixiao7/account/internal/pkg/constant"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type Queryer interface {
@@ -29,14 +28,14 @@ var db *sqlx.DB
 
 // DBOption 数据库连接参数
 type DBOption struct {
-	File                  string
+	Dsn                   string
 	MaxIdleConnections    int
 	MaxOpenConnections    int
 	MaxConnectionLifeTime int
 }
 
 func Init(option *DBOption) (*sqlx.DB, error) {
-	sqlxDB, err := newSqliteDB(option)
+	sqlxDB, err := newMysqlDB(option)
 	if err != nil {
 		return nil, err
 	}
@@ -46,21 +45,35 @@ func Init(option *DBOption) (*sqlx.DB, error) {
 	return sqlxDB, nil
 }
 
-func newSqliteDB(opts *DBOption) (*sqlx.DB, error) {
-	dsn := fmt.Sprintf("file:%s", opts.File)
-	sqlDB, err := sql.Open("sqlite3", dsn)
+func newMysqlDB(opts *DBOption) (*sqlx.DB, error) {
+	db, err := sql.Open("mysql", opts.Dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	sqlDB.SetMaxOpenConns(opts.MaxOpenConnections)
-	sqlDB.SetMaxIdleConns(opts.MaxIdleConnections)
-	sqlDB.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
+	db.SetMaxOpenConns(opts.MaxOpenConnections)
+	db.SetMaxIdleConns(opts.MaxIdleConnections)
+	db.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
 
-	sqlxDB := sqlx.NewDb(sqlDB, "sqlite3")
-
+	sqlxDB := sqlx.NewDb(db, "mysql")
 	return sqlxDB, nil
 }
+
+// func newSqliteDB(opts *DBOption) (*sqlx.DB, error) {
+// 	dsn := fmt.Sprintf("file:%s", opts.File)
+// 	sqlDB, err := sql.Open("sqlite3", dsn)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	sqlDB.SetMaxOpenConns(opts.MaxOpenConnections)
+// 	sqlDB.SetMaxIdleConns(opts.MaxIdleConnections)
+// 	sqlDB.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
+//
+// 	sqlxDB := sqlx.NewDb(sqlDB, "sqlite3")
+//
+// 	return sqlxDB, nil
+// }
 
 func Close() error {
 	if db == nil {

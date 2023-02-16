@@ -8,7 +8,7 @@ import (
 )
 
 func (m *MemberController) Pull(c *gin.Context) {
-	bookId, exist := controller.GetIntParamFromUrl(c, "bookId")
+	bookId, exist := controller.GetInt64ParamFromUrl(c, "bookId")
 	if !exist {
 		return
 	}

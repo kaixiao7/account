@@ -9,7 +9,7 @@ import (
 
 func (c *CategoryController) Pull(ctx *gin.Context) {
 
-	bookId, exist := controller.GetIntParamFromUrl(ctx, "bookId")
+	bookId, exist := controller.GetInt64ParamFromUrl(ctx, "bookId")
 	if !exist {
 		return
 	}
