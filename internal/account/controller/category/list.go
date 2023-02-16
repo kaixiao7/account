@@ -8,7 +8,7 @@ import (
 )
 
 func (c *CategoryController) List(ctx *gin.Context) {
-	bookId, ok := controller.GetIntParamFromUrl(ctx, "bookId")
+	bookId, ok := controller.GetInt64ParamFromUrl(ctx, "bookId")
 	if !ok {
 		return
 	}

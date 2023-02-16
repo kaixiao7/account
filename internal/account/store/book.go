@@ -14,12 +14,12 @@ type BookStore interface {
 
 	Update(ctx context.Context, book *model.Book) error
 
-	QueryBySyncTime(ctx context.Context, userId int, syncTime int64) ([]*model.Book, error)
+	QueryBySyncTime(ctx context.Context, userId int64, syncTime int64) ([]*model.Book, error)
 
-	QueryBookList(ctx context.Context, userId int) ([]*model.Book, error)
+	QueryBookList(ctx context.Context, userId int64) ([]*model.Book, error)
 
 	// QueryById 根据主键id查询
-	QueryById(ctx context.Context, id int) (*model.Book, error)
+	QueryById(ctx context.Context, id int64) (*model.Book, error)
 
 	// QueryBookMember 根据账本id查询该账本下的所有成员
 	// QueryBookMember(ctx context.Context, bookId int) ([]int, error)
@@ -58,7 +58,7 @@ func (b *book) Update(ctx context.Context, book *model.Book) error {
 	return nil
 }
 
-func (b *book) QueryBySyncTime(ctx context.Context, userId int, syncTime int64) ([]*model.Book, error) {
+func (b *book) QueryBySyncTime(ctx context.Context, userId int64, syncTime int64) ([]*model.Book, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from user_book where user_id = ? and sync_time > ?"
@@ -74,7 +74,7 @@ func (b *book) QueryBySyncTime(ctx context.Context, userId int, syncTime int64) 
 }
 
 // QueryBookList 查询用户账本列表
-func (b *book) QueryBookList(ctx context.Context, userId int) ([]*model.Book, error) {
+func (b *book) QueryBookList(ctx context.Context, userId int64) ([]*model.Book, error) {
 	db := getDBFromContext(ctx)
 	sql := `
 		select *
@@ -97,7 +97,7 @@ func (b *book) QueryBookList(ctx context.Context, userId int) ([]*model.Book, er
 }
 
 // QueryById 根据主键id查询
-func (b *book) QueryById(ctx context.Context, id int) (*model.Book, error) {
+func (b *book) QueryById(ctx context.Context, id int64) (*model.Book, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from user_book where id = ?"

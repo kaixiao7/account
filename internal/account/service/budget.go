@@ -10,7 +10,7 @@ import (
 
 type BudgetSrv interface {
 	Push(ctx context.Context, budgets []*model.Budget, syncTime int64) error
-	Pull(ctx context.Context, bookId int, lastSyncTime int64) ([]*model.Budget, error)
+	Pull(ctx context.Context, bookId int64, lastSyncTime int64) ([]*model.Budget, error)
 }
 
 type budgetService struct {
@@ -42,7 +42,7 @@ func (b *budgetService) Push(ctx context.Context, budgets []*model.Budget, syncT
 	})
 }
 
-func (b *budgetService) Pull(ctx context.Context, bookId int, lastSyncTime int64) ([]*model.Budget, error) {
+func (b *budgetService) Pull(ctx context.Context, bookId int64, lastSyncTime int64) ([]*model.Budget, error) {
 	return b.budgetStore.QueryBySyncTime(ctx, bookId, lastSyncTime)
 }
 

@@ -11,7 +11,7 @@ import (
 )
 
 // GetUserId 从上下文中获取认证用户id
-func GetUserId(c *gin.Context) int {
+func GetUserId(c *gin.Context) int64 {
 	userId, exist := c.Get(constant.XUserIdKey)
 
 	if !exist {
@@ -19,7 +19,7 @@ func GetUserId(c *gin.Context) int {
 		return 0
 	}
 
-	return userId.(int)
+	return userId.(int64)
 }
 
 // GetIntParamFromUrl 从请求路径中获取指定的int类型参数
@@ -31,6 +31,17 @@ func GetIntParamFromUrl(c *gin.Context, paramName string) (int, bool) {
 	}
 
 	return bookId, true
+}
+
+// GetInt64ParamFromUrl 从请求路径中获取指定的int64类型参数
+func GetInt64ParamFromUrl(c *gin.Context, paramName string) (int64, bool) {
+	ret, err := strconv.ParseInt(c.Param(paramName), 10, 64)
+	if err != nil {
+		core.WriteRespErr(c, errno.New(errno.ErrValidation))
+		return 0, false
+	}
+
+	return ret, true
 }
 
 // GetInt64ParamFromParam 从请求路径中获取指定的int64类型参数

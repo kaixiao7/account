@@ -11,9 +11,9 @@ import (
 type BookSrv interface {
 	Push(ctx context.Context, books []*model.Book, syncTime int64) error
 
-	Pull(ctx context.Context, userId int, lastSyncTime int64) ([]*model.Book, error)
+	Pull(ctx context.Context, userId int64, lastSyncTime int64) ([]*model.Book, error)
 
-	QueryBookList(ctx context.Context, userId int) ([]*model.Book, error)
+	QueryBookList(ctx context.Context, userId int64) ([]*model.Book, error)
 }
 
 type bookService struct {
@@ -45,11 +45,11 @@ func (b *bookService) Push(ctx context.Context, books []*model.Book, syncTime in
 	})
 }
 
-func (b *bookService) Pull(ctx context.Context, userId int, lastSyncTime int64) ([]*model.Book, error) {
+func (b *bookService) Pull(ctx context.Context, userId int64, lastSyncTime int64) ([]*model.Book, error) {
 	return b.bookStore.QueryBySyncTime(ctx, userId, lastSyncTime)
 }
 
 // QueryBookList 查询用户账本列表
-func (b *bookService) QueryBookList(ctx context.Context, userId int) ([]*model.Book, error) {
+func (b *bookService) QueryBookList(ctx context.Context, userId int64) ([]*model.Book, error) {
 	return b.bookStore.QueryBookList(ctx, userId)
 }

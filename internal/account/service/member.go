@@ -11,7 +11,7 @@ import (
 type MemberSrv interface {
 	Push(ctx context.Context, members []*model.Member, syncTime int64) error
 
-	Pull(ctx context.Context, bookId int, lastSyncTime int64) ([]*model.Member, error)
+	Pull(ctx context.Context, bookId int64, lastSyncTime int64) ([]*model.Member, error)
 }
 
 type memberService struct {
@@ -45,6 +45,6 @@ func (m *memberService) Push(ctx context.Context, members []*model.Member, syncT
 	})
 }
 
-func (m *memberService) Pull(ctx context.Context, bookId int, lastSyncTime int64) ([]*model.Member, error) {
+func (m *memberService) Pull(ctx context.Context, bookId int64, lastSyncTime int64) ([]*model.Member, error) {
 	return m.memberStore.QueryBySyncTime(ctx, bookId, lastSyncTime)
 }

@@ -10,12 +10,12 @@ import (
 
 type CategorySrv interface {
 	Push(ctx context.Context, categories []*model.Category, syncTime int64) error
-	Pull(ctx context.Context, bookId int, lastSyncTime int64) ([]*model.Category, error)
+	Pull(ctx context.Context, bookId int64, lastSyncTime int64) ([]*model.Category, error)
 
-	QueryAll(ctx context.Context, bookId int) ([]model.Category, error)
+	QueryAll(ctx context.Context, bookId int64) ([]model.Category, error)
 
 	// QueryByUserId 根据用户id查询其所有分类
-	QueryByUserId(ctx context.Context, userId int) ([]model.Category, error)
+	QueryByUserId(ctx context.Context, userId int64) ([]model.Category, error)
 }
 
 type categoryService struct {
@@ -49,16 +49,16 @@ func (c *categoryService) Push(ctx context.Context, categories []*model.Category
 	})
 }
 
-func (c *categoryService) Pull(ctx context.Context, bookId int, lastSyncTime int64) ([]*model.Category, error) {
+func (c *categoryService) Pull(ctx context.Context, bookId int64, lastSyncTime int64) ([]*model.Category, error) {
 	return c.categoryStore.QueryBySyncTime(ctx, bookId, lastSyncTime)
 }
 
 // QueryAll 查询账本下的所有分类
-func (c *categoryService) QueryAll(ctx context.Context, bookId int) ([]model.Category, error) {
+func (c *categoryService) QueryAll(ctx context.Context, bookId int64) ([]model.Category, error) {
 	return c.categoryStore.QueryAll(ctx, bookId)
 }
 
 // QueryByUserId 根据用户id查询其所有分类
-func (c *categoryService) QueryByUserId(ctx context.Context, userId int) ([]model.Category, error) {
+func (c *categoryService) QueryByUserId(ctx context.Context, userId int64) ([]model.Category, error) {
 	return c.categoryStore.QueryByUserId(ctx, userId)
 }

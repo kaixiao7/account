@@ -16,7 +16,7 @@ func (af *AccountFlowController) PullOther(c *gin.Context) {
 		return
 	}
 
-	flows, err := af.accountFlowSrv.PullOther(c, int(userId), lastSyncTime)
+	flows, err := af.accountFlowSrv.PullOther(c, userId, lastSyncTime)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return

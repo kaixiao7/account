@@ -17,19 +17,19 @@ type AccountStore interface {
 	// Update 更新账户
 	Update(ctx context.Context, account *model.Account) error
 	// QueryBySyncTime 根据同步时间查询
-	QueryBySyncTime(ctx context.Context, userId int, syncTime int64) ([]model.Account, error)
+	QueryBySyncTime(ctx context.Context, userId int64, syncTime int64) ([]model.Account, error)
 
 	// Delete 删除账户
 	// 执行的是逻辑删除，将字段del置为1
-	Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, id int64) error
 
 	// QueryAllByUserId 根据用户id查询其所有账户
-	QueryAllByUserId(ctx context.Context, userId int) ([]model.Account, error)
+	QueryAllByUserId(ctx context.Context, userId int64) ([]model.Account, error)
 	// QueryById 根据id查询账户
-	QueryById(ctx context.Context, id int) (*model.Account, error)
+	QueryById(ctx context.Context, id int64) (*model.Account, error)
 
 	// ModifyBalance 修改账户余额
-	ModifyBalance(ctx context.Context, id int, diff float64) error
+	ModifyBalance(ctx context.Context, id int64, diff float64) error
 }
 
 type account struct {
@@ -73,7 +73,7 @@ func (a *account) Update(ctx context.Context, account *model.Account) error {
 }
 
 // QueryBySyncTime 根据同步时间查询
-func (a *account) QueryBySyncTime(ctx context.Context, userId int, syncTime int64) ([]model.Account, error) {
+func (a *account) QueryBySyncTime(ctx context.Context, userId int64, syncTime int64) ([]model.Account, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from user_account where user_id = ? and sync_time > ?"
@@ -92,7 +92,7 @@ func (a *account) QueryBySyncTime(ctx context.Context, userId int, syncTime int6
 
 // Delete 删除账户
 // 执行的是逻辑删除，将字段del置为1
-func (a *account) Delete(ctx context.Context, id int) error {
+func (a *account) Delete(ctx context.Context, id int64) error {
 	db := getDBFromContext(ctx)
 
 	deleteSql := "update user_account set del = ? where id =?"
@@ -105,7 +105,7 @@ func (a *account) Delete(ctx context.Context, id int) error {
 }
 
 // QueryAllByUserId 根据用户id查询其所有账户
-func (a *account) QueryAllByUserId(ctx context.Context, userId int) ([]model.Account, error) {
+func (a *account) QueryAllByUserId(ctx context.Context, userId int64) ([]model.Account, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from user_account where user_id = ?"
@@ -123,7 +123,7 @@ func (a *account) QueryAllByUserId(ctx context.Context, userId int) ([]model.Acc
 }
 
 // QueryById 根据id查询账户
-func (a *account) QueryById(ctx context.Context, id int) (*model.Account, error) {
+func (a *account) QueryById(ctx context.Context, id int64) (*model.Account, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from user_account where id = ? and del = ?"
@@ -141,7 +141,7 @@ func (a *account) QueryById(ctx context.Context, id int) (*model.Account, error)
 }
 
 // ModifyBalance 修改账户余额
-func (a *account) ModifyBalance(ctx context.Context, id int, diff float64) error {
+func (a *account) ModifyBalance(ctx context.Context, id int64, diff float64) error {
 	db := getDBFromContext(ctx)
 	updateSql := "update user_account set balance = balance + ? where id = ?"
 

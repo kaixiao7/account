@@ -1,9 +1,9 @@
 package model
 
 type Book struct {
-	Id         int    `db:"id" json:"id"`
+	Id         int64  `db:"id" json:"id"`
 	BookName   string `db:"book_name" json:"book_name"`
-	UserId     int    `db:"user_id" json:"user_id"`
+	UserId     int64  `db:"user_id" json:"user_id"`
 	Cover      string `db:"cover" json:"cover"`
 	DelFlag    int    `db:"del_flag" json:"del_flag"`
 	SyncState  int    `db:"sync_state" json:"sync_state"`

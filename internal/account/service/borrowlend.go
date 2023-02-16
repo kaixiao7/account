@@ -12,17 +12,17 @@ import (
 
 type BorrowLendSrv interface {
 	// QueryTotal 查询总借入借出
-	QueryTotal(ctx context.Context, userId int) (*model.BorrowLendTotal, error)
+	QueryTotal(ctx context.Context, userId int64) (*model.BorrowLendTotal, error)
 	// AddBorrowLendFlow 添加借入借出流水
-	AddBorrowLendFlow(ctx context.Context, bf *model.BorrowLendFlow, userId int) error
+	AddBorrowLendFlow(ctx context.Context, bf *model.BorrowLendFlow, userId int64) error
 	// DeleteBorrowLendFlow 删除借入借出流水
-	DeleteBorrowLendFlow(ctx context.Context, bfId, userId int) error
+	DeleteBorrowLendFlow(ctx context.Context, bfId, userId int64) error
 	// QueryBorrowLendFlowList 查询借入借出流水列表
-	QueryBorrowLendFlowList(ctx context.Context, accountFlowId, userId int) ([]model.AccountFlow, error)
+	QueryBorrowLendFlowList(ctx context.Context, accountFlowId, userId int64) ([]model.AccountFlow, error)
 	// QueryBorrowLendList 查询借入借出列表
-	QueryBorrowLendList(ctx context.Context, userId, borrowType int) ([]model.AccountFlow, error)
+	QueryBorrowLendList(ctx context.Context, userId int64, borrowType int) ([]model.AccountFlow, error)
 	// FinishedBorrowLend 结束债务
-	FinishedBorrowLend(ctx context.Context, borrowId, userId int) error
+	FinishedBorrowLend(ctx context.Context, borrowId, userId int64) error
 }
 
 type borrowLendService struct {
@@ -40,7 +40,7 @@ func NewBorrowLendSrv() BorrowLendSrv {
 }
 
 // QueryTotal 查询总借入借出
-func (b *borrowLendService) QueryTotal(ctx context.Context, userId int) (*model.BorrowLendTotal, error) {
+func (b *borrowLendService) QueryTotal(ctx context.Context, userId int64) (*model.BorrowLendTotal, error) {
 	// 借入流水
 	borrowFlows, err := b.accountFlowStore.QueryByUserIdAndType(ctx, userId, constant.AccountTypeBorrow)
 	if err != nil {
@@ -93,7 +93,7 @@ func (b *borrowLendService) QueryTotal(ctx context.Context, userId int) (*model.
 }
 
 // AddBorrowLendFlow 添加借入借出流水
-func (b *borrowLendService) AddBorrowLendFlow(ctx context.Context, bf *model.BorrowLendFlow, userId int) error {
+func (b *borrowLendService) AddBorrowLendFlow(ctx context.Context, bf *model.BorrowLendFlow, userId int64) error {
 
 	if bf.Type != constant.AccountTypeStill && bf.Type != constant.AccountTypeHarvest {
 		return errno.New(errno.ErrIllegalOperate)
@@ -125,12 +125,12 @@ func (b *borrowLendService) AddBorrowLendFlow(ctx context.Context, bf *model.Bor
 }
 
 // DeleteBorrowLendFlow 删除借入借出流水(还款、收款)
-func (b *borrowLendService) DeleteBorrowLendFlow(ctx context.Context, bfId, userId int) error {
+func (b *borrowLendService) DeleteBorrowLendFlow(ctx context.Context, bfId, userId int64) error {
 	return b.accountFlowSrv.Delete(ctx, bfId, userId)
 }
 
 // QueryBorrowLendFlowList 查询借入借出流水列表(还款、收款)
-func (b *borrowLendService) QueryBorrowLendFlowList(ctx context.Context, accountFlowId, userId int) ([]model.AccountFlow, error) {
+func (b *borrowLendService) QueryBorrowLendFlowList(ctx context.Context, accountFlowId, userId int64) ([]model.AccountFlow, error) {
 	if _, err := b.checkAccountFlow(ctx, accountFlowId, userId); err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (b *borrowLendService) QueryBorrowLendFlowList(ctx context.Context, account
 }
 
 // QueryBorrowLendList 查询借入借出列表
-func (b *borrowLendService) QueryBorrowLendList(ctx context.Context, userId, borrowType int) ([]model.AccountFlow, error) {
+func (b *borrowLendService) QueryBorrowLendList(ctx context.Context, userId int64, borrowType int) ([]model.AccountFlow, error) {
 	if borrowType != constant.AccountTypeBorrow && borrowType != constant.AccountTypeLend {
 		return nil, errno.New(errno.ErrValidation)
 	}
@@ -147,14 +147,14 @@ func (b *borrowLendService) QueryBorrowLendList(ctx context.Context, userId, bor
 }
 
 // FinishedBorrowLend 结束债务
-func (b *borrowLendService) FinishedBorrowLend(ctx context.Context, borrowId, userId int) error {
+func (b *borrowLendService) FinishedBorrowLend(ctx context.Context, borrowId, userId int64) error {
 	if _, err := b.checkAccountFlow(ctx, borrowId, userId); err != nil {
 		return err
 	}
 	return b.accountFlowStore.FinishedBorrow(ctx, borrowId)
 }
 
-func (b *borrowLendService) checkAccountFlow(ctx context.Context, accountFlowId, userId int) (*model.AccountFlow, error) {
+func (b *borrowLendService) checkAccountFlow(ctx context.Context, accountFlowId, userId int64) (*model.AccountFlow, error) {
 	accountFlow, err := b.accountFlowStore.QueryById(ctx, accountFlowId)
 	if err != nil {
 		return nil, err

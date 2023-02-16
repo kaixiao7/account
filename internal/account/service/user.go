@@ -9,7 +9,7 @@ import (
 
 type UserSrv interface {
 	Get(ctx context.Context, username string) (*model.User, error)
-	GetById(ctx context.Context, id int) (*model.User, error)
+	GetById(ctx context.Context, id int64) (*model.User, error)
 }
 
 type UserService struct {
@@ -24,6 +24,6 @@ func (u *UserService) Get(ctx context.Context, username string) (*model.User, er
 	return u.userStore.GetByUsername(ctx, username)
 }
 
-func (u *UserService) GetById(ctx context.Context, id int) (*model.User, error) {
+func (u *UserService) GetById(ctx context.Context, id int64) (*model.User, error) {
 	return u.userStore.GetById(ctx, id)
 }

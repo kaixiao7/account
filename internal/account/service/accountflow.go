@@ -18,15 +18,15 @@ type AccountFlowSrv interface {
 
 	Push(ctx context.Context, flows []*model.AccountFlow, syncTime int64) error
 	// PullBook 客户端从服务端拉取账本数据
-	PullBook(ctx context.Context, bookId int, lastSyncTime int64, pageNum int) (model.Page, error)
+	PullBook(ctx context.Context, bookId int64, lastSyncTime int64, pageNum int) (model.Page, error)
 	// PullOther 客户端从服务拉取除账本外的其他流水
-	PullOther(ctx context.Context, userId int, lastSyncTime int64) ([]*model.AccountFlow, error)
+	PullOther(ctx context.Context, userId int64, lastSyncTime int64) ([]*model.AccountFlow, error)
 
 	// Delete 删除流水
-	Delete(ctx context.Context, accountFlowId, userId int) error
+	Delete(ctx context.Context, accountFlowId, userId int64) error
 
 	// QueryByAccountId 根据账户id查询其下的所有流水信息
-	QueryByAccountId(ctx context.Context, accountId, userId int) ([]model.AccountFlow, error)
+	QueryByAccountId(ctx context.Context, accountId, userId int64) ([]model.AccountFlow, error)
 }
 
 type accountFlowService struct {
@@ -63,7 +63,7 @@ func (af *accountFlowService) Push(ctx context.Context, flows []*model.AccountFl
 }
 
 // PullBook 客户端从服务端拉取账本数据
-func (af *accountFlowService) PullBook(ctx context.Context, bookId int, lastSyncTime int64, pageNum int) (model.Page, error) {
+func (af *accountFlowService) PullBook(ctx context.Context, bookId int64, lastSyncTime int64, pageNum int) (model.Page, error) {
 	pageSize := 1000
 	count, err := af.accountFlowStore.QueryByBookSyncTimeCount(ctx, bookId, lastSyncTime)
 	if err != nil {
@@ -98,7 +98,7 @@ func (af *accountFlowService) PullBook(ctx context.Context, bookId int, lastSync
 }
 
 // PullOther 客户端从服务拉取除账本外的其他流水
-func (af *accountFlowService) PullOther(ctx context.Context, userId int, lastSyncTime int64) ([]*model.AccountFlow, error) {
+func (af *accountFlowService) PullOther(ctx context.Context, userId int64, lastSyncTime int64) ([]*model.AccountFlow, error) {
 	return af.accountFlowStore.QueryByUserIdSyncTime(ctx, userId, lastSyncTime)
 }
 
@@ -178,7 +178,7 @@ func (af *accountFlowService) Update(ctx context.Context, accountFlow *model.Acc
 }
 
 // Delete 删除流水
-func (af *accountFlowService) Delete(ctx context.Context, accountFlowId, userId int) error {
+func (af *accountFlowService) Delete(ctx context.Context, accountFlowId, userId int64) error {
 	accountFlow, err := af.checkAccountFlow(ctx, accountFlowId, userId)
 	if err != nil {
 		return err
@@ -225,7 +225,7 @@ func (af *accountFlowService) moneyRegain(ctx context.Context, accountFlow *mode
 	return nil
 }
 
-func (af *accountFlowService) checkAccount(ctx context.Context, accountId, userId int) (*model.Account, error) {
+func (af *accountFlowService) checkAccount(ctx context.Context, accountId, userId int64) (*model.Account, error) {
 	account, err := af.accountStore.QueryById(ctx, accountId)
 	if err != nil {
 		return nil, err
@@ -242,7 +242,7 @@ func (af *accountFlowService) checkAccount(ctx context.Context, accountId, userI
 	return account, nil
 }
 
-func (af *accountFlowService) checkAccountFlow(ctx context.Context, accountFlowId, userId int) (*model.AccountFlow, error) {
+func (af *accountFlowService) checkAccountFlow(ctx context.Context, accountFlowId, userId int64) (*model.AccountFlow, error) {
 	accountFlow, err := af.accountFlowStore.QueryById(ctx, accountFlowId)
 	if err != nil {
 		return nil, err
@@ -295,7 +295,7 @@ func (af *accountFlowService) saveCheck(ctx context.Context, accountFlow *model.
 }
 
 // QueryByAccountId 根据账户id查询其下的所有流水信息
-func (af *accountFlowService) QueryByAccountId(ctx context.Context, accountId, userId int) ([]model.AccountFlow, error) {
+func (af *accountFlowService) QueryByAccountId(ctx context.Context, accountId, userId int64) ([]model.AccountFlow, error) {
 	_, err := af.checkAccount(ctx, accountId, userId)
 	if err != nil {
 		return nil, err

@@ -16,18 +16,18 @@ type accountFlowUpdateReq struct {
 	Cost            float64        `db:"cost" json:"cost"  binding:"required,numeric"`
 	RecordTime      timex.JsonTime `db:"record_time" json:"record_time"  binding:"required"`
 	Remark          string         `db:"remark" json:"remark,omitempty"`
-	CategoryId      int            `db:"category_id" json:"category_id,omitempty"`
-	TargetAccountId int            `db:"target_account_id" json:"target_account_id,omitempty"`
+	CategoryId      int64          `db:"category_id" json:"category_id,omitempty"`
+	TargetAccountId int64          `db:"target_account_id" json:"target_account_id,omitempty"`
 	AssociateName   string         `db:"associate_name" json:"associate_name,omitempty"`
 }
 
 func (af *AccountFlowController) Update(c *gin.Context) {
 	userId := controller.GetUserId(c)
-	accountId, ok := controller.GetIntParamFromUrl(c, "accountId")
+	accountId, ok := controller.GetInt64ParamFromUrl(c, "accountId")
 	if !ok {
 		return
 	}
-	accountFlowId, ok := controller.GetIntParamFromUrl(c, "accountFlowId")
+	accountFlowId, ok := controller.GetInt64ParamFromUrl(c, "accountFlowId")
 	if !ok {
 		return
 	}

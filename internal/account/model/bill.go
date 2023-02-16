@@ -1,6 +1,6 @@
 package model
 
 type BillTag struct {
-	CategoryId int    `db:"category_id" json:"category_id"`
+	CategoryId int64  `db:"category_id" json:"category_id"`
 	Remark     string `db:"remark" json:"tag"`
 }

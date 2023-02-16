@@ -11,7 +11,7 @@ func (af *AccountFlowController) List(c *gin.Context) {
 
 	userId := controller.GetUserId(c)
 
-	accountId, ok := controller.GetIntParamFromUrl(c, "accountId")
+	accountId, ok := controller.GetInt64ParamFromUrl(c, "accountId")
 	if !ok {
 		return
 	}

@@ -12,7 +12,7 @@ import (
 type BudgetStore interface {
 	AddBudget(ctx context.Context, budget *model.Budget) error
 	UpdateBudget(ctx context.Context, budget *model.Budget) error
-	QueryBySyncTime(ctx context.Context, bookId int, syncTime int64) ([]*model.Budget, error)
+	QueryBySyncTime(ctx context.Context, bookId int64, syncTime int64) ([]*model.Budget, error)
 }
 
 type budget struct {
@@ -52,7 +52,7 @@ func (b *budget) UpdateBudget(ctx context.Context, budget *model.Budget) error {
 	return nil
 }
 
-func (b *budget) QueryBySyncTime(ctx context.Context, bookId int, syncTime int64) ([]*model.Budget, error) {
+func (b *budget) QueryBySyncTime(ctx context.Context, bookId int64, syncTime int64) ([]*model.Budget, error) {
 	db := getDBFromContext(ctx)
 	querySql := "select * from book_budget where book_id = ? and sync_time > ?"
 
@@ -71,7 +71,7 @@ func (b *budget) QueryBySyncTime(ctx context.Context, bookId int, syncTime int64
 }
 
 // QueryByBookId 查询账本预算
-func (b *budget) QueryByBookId(ctx context.Context, bookId int) ([]*model.Budget, error) {
+func (b *budget) QueryByBookId(ctx context.Context, bookId int64) ([]*model.Budget, error) {
 	db := getDBFromContext(ctx)
 	querySql := "select * from book_budget where book_id = ?"
 

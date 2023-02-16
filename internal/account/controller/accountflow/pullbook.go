@@ -14,7 +14,7 @@ func (af *AccountFlowController) PullBook(c *gin.Context) {
 		return
 	}
 
-	bookId, exist := controller.GetIntParamFromUrl(c, "bookId")
+	bookId, exist := controller.GetInt64ParamFromUrl(c, "bookId")
 	if !exist {
 		return
 	}
@@ -24,7 +24,7 @@ func (af *AccountFlowController) PullBook(c *gin.Context) {
 		return
 	}
 
-	flowPages, err := af.accountFlowSrv.PullBook(c, int(bookId), lastSyncTime, int(pageNum))
+	flowPages, err := af.accountFlowSrv.PullBook(c, bookId, lastSyncTime, int(pageNum))
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return

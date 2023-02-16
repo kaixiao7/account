@@ -28,7 +28,7 @@ func Auth() gin.HandlerFunc {
 
 		uri := c.Request.RequestURI
 
-		var identity int
+		var identity int64
 		var err error
 		if uri == "/refresh" {
 			identity, err = token.DecodeRefreshToken(t)

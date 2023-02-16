@@ -12,14 +12,14 @@ import (
 type CategoryStore interface {
 	Add(ctx context.Context, category *model.Category) error
 	Update(ctx context.Context, category *model.Category) error
-	QueryBySyncTime(ctx context.Context, bookId int, syncTime int64) ([]*model.Category, error)
+	QueryBySyncTime(ctx context.Context, bookId int64, syncTime int64) ([]*model.Category, error)
 
-	QueryAll(ctx context.Context, bookId int) ([]model.Category, error)
+	QueryAll(ctx context.Context, bookId int64) ([]model.Category, error)
 	// QueryById 通过主键查询
-	QueryById(ctx context.Context, id int) (*model.Category, error)
+	QueryById(ctx context.Context, id int64) (*model.Category, error)
 
 	// QueryByUserId 根据用户id查询其所有的分类
-	QueryByUserId(ctx context.Context, userId int) ([]model.Category, error)
+	QueryByUserId(ctx context.Context, userId int64) ([]model.Category, error)
 }
 
 type category struct {
@@ -30,7 +30,7 @@ func NewCategoryStore() CategoryStore {
 }
 
 // QueryAll 查询账本下的所有分类
-func (c *category) QueryAll(ctx context.Context, bookId int) ([]model.Category, error) {
+func (c *category) QueryAll(ctx context.Context, bookId int64) ([]model.Category, error) {
 	db := getDBFromContext(ctx)
 
 	sql := "select * from category where book_id = ? order by sort"
@@ -44,7 +44,7 @@ func (c *category) QueryAll(ctx context.Context, bookId int) ([]model.Category, 
 }
 
 // QueryByUserId 根据用户id查询其所有的分类
-func (c *category) QueryByUserId(ctx context.Context, userId int) ([]model.Category, error) {
+func (c *category) QueryByUserId(ctx context.Context, userId int64) ([]model.Category, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from category where user_id = ?"
@@ -59,7 +59,7 @@ func (c *category) QueryByUserId(ctx context.Context, userId int) ([]model.Categ
 }
 
 // QueryById 通过主键查询
-func (c *category) QueryById(ctx context.Context, id int) (*model.Category, error) {
+func (c *category) QueryById(ctx context.Context, id int64) (*model.Category, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from category where id = ?"
@@ -104,7 +104,7 @@ func (c *category) Update(ctx context.Context, category *model.Category) error {
 	return nil
 }
 
-func (c *category) QueryBySyncTime(ctx context.Context, bookId int, syncTime int64) ([]*model.Category, error) {
+func (c *category) QueryBySyncTime(ctx context.Context, bookId int64, syncTime int64) ([]*model.Category, error) {
 	db := getDBFromContext(ctx)
 
 	querySql := "select * from category where book_id = ? and sync_time > ?"

@@ -17,7 +17,7 @@ func (u *UserController) Get(c *gin.Context) {
 		return
 	}
 
-	user, err := u.userSrv.GetById(c, userId.(int))
+	user, err := u.userSrv.GetById(c, userId.(int64))
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return

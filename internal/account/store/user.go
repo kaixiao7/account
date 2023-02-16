@@ -11,7 +11,7 @@ import (
 
 type UserStore interface {
 	GetByUsername(ctx context.Context, username string) (*model.User, error)
-	GetById(ctx context.Context, id int) (*model.User, error)
+	GetById(ctx context.Context, id int64) (*model.User, error)
 }
 
 type user struct {
@@ -42,7 +42,7 @@ func (u *user) GetByUsername(ctx context.Context, username string) (*model.User,
 	return &user, nil
 }
 
-func (u *user) GetById(ctx context.Context, id int) (*model.User, error) {
+func (u *user) GetById(ctx context.Context, id int64) (*model.User, error) {
 	db := getDBFromContext(ctx)
 
 	sql := fmt.Sprintf("select %s from user where id = ?", base_field)

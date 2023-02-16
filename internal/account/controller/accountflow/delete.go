@@ -9,7 +9,7 @@ import (
 
 func (af *AccountFlowController) Delete(c *gin.Context) {
 	userId := controller.GetUserId(c)
-	accountFlowId, ok := controller.GetIntParamFromUrl(c, "accountFlowId")
+	accountFlowId, ok := controller.GetInt64ParamFromUrl(c, "accountFlowId")
 	if !ok {
 		return
 	}
