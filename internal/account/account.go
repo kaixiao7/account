@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -58,7 +59,11 @@ func NewAccountServerCommand() *cobra.Command {
 func run() error {
 	// 初始化数据库配置
 	db, err := store.Init(&store.DBOption{
-		Dsn:                   viper.GetString("db.dsn"),
+		Host:                  viper.GetString("db.host"),
+		Username:              viper.GetString("db.username"),
+		Password:              viper.GetString("db.password"),
+		Database:              viper.GetString("db.database"),
+		Tls:                   viper.GetBool("db.tls"),
 		MaxIdleConnections:    viper.GetInt("db.max-idle-connections"),
 		MaxOpenConnections:    viper.GetInt("db.max-open-connections"),
 		MaxConnectionLifeTime: viper.GetInt("db.max-connection-life-time"),
@@ -127,7 +132,18 @@ func initConfig() {
 		viper.SetConfigName(defaultConfigName)
 	}
 
-	viper.SetConfigType("yaml")
+	viper.SetConfigType("yaml")   // 设置配置文件格式为YAML
+	viper.SetEnvPrefix("ACCOUNT") // 读取环境变量的前缀为ACCOUNT
+	viper.AutomaticEnv()          // 读取匹配的环境变量
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	// viper读取配置文件的优先级从高到低
+	// - 通过viper.Set函数显示设置的配置
+	// - 命令行参数
+	// - 环境变量
+	// - 配置文件
+	// - Key/Value存储
+	// - 默认值
 
 	// 读取配置文件内容
 	if err := viper.ReadInConfig(); err == nil {

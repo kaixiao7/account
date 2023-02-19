@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"kaixiao7/account/internal/pkg/constant"
@@ -28,7 +29,11 @@ var db *sqlx.DB
 
 // DBOption 数据库连接参数
 type DBOption struct {
-	Dsn                   string
+	Host                  string
+	Username              string
+	Password              string
+	Database              string
+	Tls                   bool
 	MaxIdleConnections    int
 	MaxOpenConnections    int
 	MaxConnectionLifeTime int
@@ -46,7 +51,13 @@ func Init(option *DBOption) (*sqlx.DB, error) {
 }
 
 func newMysqlDB(opts *DBOption) (*sqlx.DB, error) {
-	db, err := sql.Open("mysql", opts.Dsn)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&tls=%t",
+		opts.Username,
+		opts.Password,
+		opts.Host,
+		opts.Database,
+		opts.Tls)
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
 	}
