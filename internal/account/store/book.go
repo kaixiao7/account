@@ -35,8 +35,8 @@ func NewBookStore() BookStore {
 func (b *book) Add(ctx context.Context, book *model.Book) error {
 	db := getDBFromContext(ctx)
 
-	insertSql := "insert into user_book values(?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	_, err := db.Exec(insertSql, book.Id, book.BookName, book.UserId, book.Cover, book.DelFlag, book.SyncState, book.SyncTime,
+	insertSql := "insert into user_book values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	_, err := db.Exec(insertSql, book.Id, book.BookName, book.UserId, book.Cover, book.Budget, book.Type, book.DelFlag, book.SyncState, book.SyncTime,
 		book.CreateTime, book.UpdateTime)
 	if err != nil {
 		return errors.Wrap(err, "book add store")
@@ -48,8 +48,8 @@ func (b *book) Add(ctx context.Context, book *model.Book) error {
 func (b *book) Update(ctx context.Context, book *model.Book) error {
 	db := getDBFromContext(ctx)
 
-	updateSql := "update user_book set book_name=?, user_id=?, cover=?, del_flag=?, sync_state=?, sync_time=?, create_time=?,update_time=? where id=?"
-	_, err := db.Exec(updateSql, book.BookName, book.UserId, book.Cover, book.DelFlag, book.SyncState, book.SyncTime,
+	updateSql := "update user_book set book_name=?, user_id=?, cover=?, budget=?, type=?,  del_flag=?, sync_state=?, sync_time=?, create_time=?,update_time=? where id=?"
+	_, err := db.Exec(updateSql, book.BookName, book.UserId, book.Cover, book.Budget, book.Type, book.DelFlag, book.SyncState, book.SyncTime,
 		book.CreateTime, book.UpdateTime, book.Id)
 
 	if err != nil {
