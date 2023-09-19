@@ -9,8 +9,10 @@ import (
 )
 
 type Tokens struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken   string `json:"access_token"`
+	AccessExpire  int64  `json:"access_expire"`
+	RefreshToken  string `json:"refresh_token"`
+	RefreshExpire int64  `json:"refresh_expire"`
 }
 
 type LoginRequest struct {

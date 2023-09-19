@@ -10,7 +10,7 @@ import (
 func (u *UserController) RefreshToken(c *gin.Context) {
 	userId := controller.GetUserId(c)
 
-	resp, err := generateTokens(userId)
+	resp, err := refreshAccessToken(userId)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return

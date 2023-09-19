@@ -2,8 +2,10 @@ package store
 
 import (
 	"context"
+	"database/sql"
 
 	"kaixiao7/account/internal/account/model"
+	"kaixiao7/account/internal/pkg/errno"
 
 	"github.com/pkg/errors"
 )
@@ -26,10 +28,13 @@ func (u *user) GetByUsername(ctx context.Context, username string) (*model.User,
 	db := getDBFromContext(ctx)
 
 	// sql := fmt.Sprintf("select * from users where username = ?", base_field)
-	sql := db.Rebind("select * from users where username = ?")
+	querySql := db.Rebind("select * from users where username = ?")
 	user := model.User{}
-	err := db.Get(&user, sql, username)
+	err := db.Get(&user, querySql, username)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errno.New(errno.ErrPasswordIncorrect)
+		}
 		return nil, errors.Wrap(err, "get by username")
 	}
 
