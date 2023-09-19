@@ -8,8 +8,8 @@ import (
 
 	"kaixiao7/account/internal/pkg/constant"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type Queryer interface {
@@ -23,6 +23,8 @@ type Queryer interface {
 	Queryx(query string, args ...any) (*sqlx.Rows, error)
 	QueryRowx(query string, args ...any) *sqlx.Row
 	Preparex(query string) (*sqlx.Stmt, error)
+
+	Rebind(query string) string
 }
 
 var db *sqlx.DB
@@ -40,7 +42,7 @@ type DBOption struct {
 }
 
 func Init(option *DBOption) (*sqlx.DB, error) {
-	sqlxDB, err := newMysqlDB(option)
+	sqlxDB, err := newPgDB(option)
 	if err != nil {
 		return nil, err
 	}
@@ -50,14 +52,14 @@ func Init(option *DBOption) (*sqlx.DB, error) {
 	return sqlxDB, nil
 }
 
-func newMysqlDB(opts *DBOption) (*sqlx.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&tls=%t",
+func newPgDB(opts *DBOption) (*sqlx.DB, error) {
+	// postgres://username:password@localhost:5432/database_name
+	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
 		opts.Username,
 		opts.Password,
 		opts.Host,
-		opts.Database,
-		opts.Tls)
-	db, err := sql.Open("mysql", dsn)
+		opts.Database)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -66,9 +68,29 @@ func newMysqlDB(opts *DBOption) (*sqlx.DB, error) {
 	db.SetMaxIdleConns(opts.MaxIdleConnections)
 	db.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
 
-	sqlxDB := sqlx.NewDb(db, "mysql")
+	sqlxDB := sqlx.NewDb(db, "postgres")
 	return sqlxDB, nil
 }
+
+// func newMysqlDB(opts *DBOption) (*sqlx.DB, error) {
+// 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&tls=%t",
+// 		opts.Username,
+// 		opts.Password,
+// 		opts.Host,
+// 		opts.Database,
+// 		opts.Tls)
+// 	db, err := sql.Open("mysql", dsn)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	db.SetMaxOpenConns(opts.MaxOpenConnections)
+// 	db.SetMaxIdleConns(opts.MaxIdleConnections)
+// 	db.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
+//
+// 	sqlxDB := sqlx.NewDb(db, "mysql")
+// 	return sqlxDB, nil
+// }
 
 // func newSqliteDB(opts *DBOption) (*sqlx.DB, error) {
 // 	dsn := fmt.Sprintf("file:%s", opts.File)

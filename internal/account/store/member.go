@@ -28,7 +28,7 @@ func NewMemberStore() MemberStore {
 func (m *member) Add(ctx context.Context, member *model.Member) error {
 	db := getDBFromContext(ctx)
 
-	insertSql := "insert into book_member values(?,?,?,?,?,?,?,?,?)"
+	insertSql := db.Rebind("insert into book_member values(?,?,?,?,?,?,?,?,?)")
 	_, err := db.Exec(insertSql, member.Id, member.BookId, member.UserId, member.Username, member.DelFlag, member.SyncState, member.SyncTime,
 		member.CreateTime, member.UpdateTime)
 	if err != nil {
@@ -41,7 +41,7 @@ func (m *member) Add(ctx context.Context, member *model.Member) error {
 func (m *member) Update(ctx context.Context, member *model.Member) error {
 	db := getDBFromContext(ctx)
 
-	updateSql := "update book_member set book_id=?, user_id=?, username=?, del_flag=?, sync_state=?, sync_time=?, create_time=?,update_time=? where id=?"
+	updateSql := db.Rebind("update book_member set book_id=?, user_id=?, username=?, del_flag=?, sync_state=?, sync_time=?, create_time=?,update_time=? where id=?")
 	_, err := db.Exec(updateSql, member.BookId, member.UserId, member.Username, member.DelFlag, member.SyncState, member.SyncTime,
 		member.CreateTime, member.UpdateTime, member.Id)
 
@@ -54,7 +54,7 @@ func (m *member) Update(ctx context.Context, member *model.Member) error {
 func (m *member) QueryBySyncTime(ctx context.Context, bookId int64, syncTime int64) ([]*model.Member, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := `select * from book_member where book_id = ? and sync_time > ?`
+	querySql := db.Rebind(`select * from book_member where book_id = ? and sync_time > ?`)
 
 	var memberList = []*model.Member{}
 	err := db.Select(&memberList, querySql, bookId, syncTime)
@@ -69,7 +69,7 @@ func (m *member) QueryBySyncTime(ctx context.Context, bookId int64, syncTime int
 func (m *member) QueryByBookId(ctx context.Context, bookId int64) ([]*model.Member, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := `select * from book_member where book_id = ?`
+	querySql := db.Rebind(`select * from book_member where book_id = ?`)
 
 	var memberList = []*model.Member{}
 	err := db.Select(&memberList, querySql, bookId)

@@ -33,7 +33,7 @@ func NewCategoryStore() CategoryStore {
 func (c *category) QueryAll(ctx context.Context, bookId int64) ([]model.Category, error) {
 	db := getDBFromContext(ctx)
 
-	sql := "select * from category where book_id = ? order by sort"
+	sql := db.Rebind("select * from category where book_id = ? order by sort")
 	var categories = []model.Category{}
 	err := db.Select(&categories, sql, bookId)
 	if err != nil {
@@ -47,7 +47,7 @@ func (c *category) QueryAll(ctx context.Context, bookId int64) ([]model.Category
 func (c *category) QueryByUserId(ctx context.Context, userId int64) ([]model.Category, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from category where user_id = ?"
+	querySql := db.Rebind("select * from category where user_id = ?")
 	var categories = []model.Category{}
 	err := db.Select(&categories, querySql, userId)
 
@@ -62,7 +62,7 @@ func (c *category) QueryByUserId(ctx context.Context, userId int64) ([]model.Cat
 func (c *category) QueryById(ctx context.Context, id int64) (*model.Category, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from category where id = ?"
+	querySql := db.Rebind("select * from category where id = ?")
 	var category model.Category
 	err := db.Get(&category, querySql, id)
 
@@ -79,8 +79,8 @@ func (c *category) QueryById(ctx context.Context, id int64) (*model.Category, er
 func (c *category) Add(ctx context.Context, category *model.Category) error {
 	db := getDBFromContext(ctx)
 
-	sql := `insert into category(id, name, icon, color, sort, type, book_id, user_id, del_flag, sync_state, sync_time,
-				create_time, update_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	sql := db.Rebind(`insert into category(id, name, icon, color, sort, type, book_id, user_id, del_flag, sync_state, sync_time,
+				create_time, update_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	_, err := db.Exec(sql, category.Id, category.Name, category.Icon, category.Color, category.Sort, category.Type,
 		category.BookId, category.UserId, category.DelFlag, category.SyncState, category.SyncTime, category.CreateTime, category.UpdateTime)
 
@@ -95,7 +95,7 @@ func (c *category) Add(ctx context.Context, category *model.Category) error {
 func (c *category) Update(ctx context.Context, category *model.Category) error {
 	db := getDBFromContext(ctx)
 
-	sql := `update category set name=?,icon=?,color=?,sort=?,type=?,book_id=?,user_id=?,del_flag=?,sync_state=?,sync_time=?,update_time=? where id=?`
+	sql := db.Rebind(`update category set name=?,icon=?,color=?,sort=?,type=?,book_id=?,user_id=?,del_flag=?,sync_state=?,sync_time=?,update_time=? where id=?`)
 	_, err := db.Exec(sql, category.Name, category.Icon, category.Color, category.Sort, category.Type, category.BookId,
 		category.UserId, category.DelFlag, category.SyncState, category.SyncTime, category.UpdateTime)
 	if err != nil {
@@ -107,7 +107,7 @@ func (c *category) Update(ctx context.Context, category *model.Category) error {
 func (c *category) QueryBySyncTime(ctx context.Context, bookId int64, syncTime int64) ([]*model.Category, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from category where book_id = ? and sync_time > ?"
+	querySql := db.Rebind("select * from category where book_id = ? and sync_time > ?")
 	var category = []*model.Category{}
 	err := db.Select(&category, querySql, bookId, syncTime)
 

@@ -43,9 +43,9 @@ func NewAccountStore() AccountStore {
 func (a *account) Add(ctx context.Context, account *model.Account) error {
 	db := getDBFromContext(ctx)
 
-	insertSql := `insert into user_account(id, user_id, account_type, account_name, balance, init, icon, del, is_total,
+	insertSql := db.Rebind(`insert into user_account(id, user_id, account_type, account_name, balance, init, icon, del, is_total,
 						remark, sync_state, sync_time, create_time, update_time)
-					values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+					values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 
 	_, err := db.Exec(insertSql, account.Id, account.UserId, account.AccountType, account.AccountName, account.Balance,
 		account.Init, account.Icon, account.Del, account.IsTotal, account.Remark, account.SyncState, account.SyncTime,
@@ -61,8 +61,8 @@ func (a *account) Add(ctx context.Context, account *model.Account) error {
 // Update 更新账户
 func (a *account) Update(ctx context.Context, account *model.Account) error {
 	db := getDBFromContext(ctx)
-	updateSql := `update user_account set user_id=?,account_type=?,account_name=?,balance=?,init=?,icon=?,del=?,
-                        is_total=?,remark=?,sync_state=?,sync_time=?,update_time=? where id = ?`
+	updateSql := db.Rebind(`update user_account set user_id=?,account_type=?,account_name=?,balance=?,init=?,icon=?,del=?,
+                        is_total=?,remark=?,sync_state=?,sync_time=?,update_time=? where id = ?`)
 
 	_, err := db.Exec(updateSql, account.UserId, account.AccountType, account.AccountName, account.Balance, account.Init,
 		account.Icon, account.Del, account.IsTotal, account.Remark, account.SyncState, account.SyncTime, account.UpdateTime, account.Id)
@@ -76,7 +76,7 @@ func (a *account) Update(ctx context.Context, account *model.Account) error {
 func (a *account) QueryBySyncTime(ctx context.Context, userId int64, syncTime int64) ([]model.Account, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from user_account where user_id = ? and sync_time > ?"
+	querySql := db.Rebind("select * from user_account where user_id = ? and sync_time > ?")
 
 	var accounts = []model.Account{}
 	err := db.Select(&accounts, querySql, userId, constant.DelFalse)
@@ -95,7 +95,7 @@ func (a *account) QueryBySyncTime(ctx context.Context, userId int64, syncTime in
 func (a *account) Delete(ctx context.Context, id int64) error {
 	db := getDBFromContext(ctx)
 
-	deleteSql := "update user_account set del = ? where id =?"
+	deleteSql := db.Rebind("update user_account set del = ? where id =?")
 	_, err := db.Exec(deleteSql, constant.DelTrue, id)
 	if err != nil {
 		return errors.Wrap(err, "account delete store")
@@ -108,7 +108,7 @@ func (a *account) Delete(ctx context.Context, id int64) error {
 func (a *account) QueryAllByUserId(ctx context.Context, userId int64) ([]model.Account, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from user_account where user_id = ?"
+	querySql := db.Rebind("select * from user_account where user_id = ?")
 
 	var accounts = []model.Account{}
 	err := db.Select(&accounts, querySql, userId, constant.DelFalse)
@@ -126,7 +126,7 @@ func (a *account) QueryAllByUserId(ctx context.Context, userId int64) ([]model.A
 func (a *account) QueryById(ctx context.Context, id int64) (*model.Account, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from user_account where id = ? and del = ?"
+	querySql := db.Rebind("select * from user_account where id = ? and del = ?")
 
 	var accountModel model.Account
 	err := db.Get(&accountModel, querySql, id, constant.DelFalse)
@@ -143,7 +143,7 @@ func (a *account) QueryById(ctx context.Context, id int64) (*model.Account, erro
 // ModifyBalance 修改账户余额
 func (a *account) ModifyBalance(ctx context.Context, id int64, diff float64) error {
 	db := getDBFromContext(ctx)
-	updateSql := "update user_account set balance = balance + ? where id = ?"
+	updateSql := db.Rebind("update user_account set balance = balance + ? where id = ?")
 
 	_, err := db.Exec(updateSql, diff, id)
 

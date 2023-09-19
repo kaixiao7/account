@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"fmt"
 
 	"kaixiao7/account/internal/account/model"
 
@@ -17,7 +16,7 @@ type UserStore interface {
 type user struct {
 }
 
-var base_field = "id, username, ifnull(phone, '') as phone, ifnull(wx_id, '') as wx_id, gender, password, avatar, register_time, update_time"
+var base_field = "id, username, phone, wx_id, gender, password, avatar, register_time, update_time"
 
 func NewUserStore() UserStore {
 	return &user{}
@@ -26,7 +25,8 @@ func NewUserStore() UserStore {
 func (u *user) GetByUsername(ctx context.Context, username string) (*model.User, error) {
 	db := getDBFromContext(ctx)
 
-	sql := fmt.Sprintf("select %s from user where username = ?", base_field)
+	// sql := fmt.Sprintf("select * from users where username = ?", base_field)
+	sql := db.Rebind("select * from users where username = ?")
 	user := model.User{}
 	err := db.Get(&user, sql, username)
 	if err != nil {
@@ -45,7 +45,8 @@ func (u *user) GetByUsername(ctx context.Context, username string) (*model.User,
 func (u *user) GetById(ctx context.Context, id int64) (*model.User, error) {
 	db := getDBFromContext(ctx)
 
-	sql := fmt.Sprintf("select %s from user where id = ?", base_field)
+	// sql := fmt.Sprintf("select * from users where id = ?", base_field)
+	sql := db.Rebind("select * from users where id = ?")
 	user := model.User{}
 	err := db.Get(&user, sql, id)
 

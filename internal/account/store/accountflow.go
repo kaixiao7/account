@@ -64,10 +64,10 @@ func NewAccountFlowStore() AccountFlow {
 func (af *accountFlow) Add(ctx context.Context, flow *model.AccountFlow) error {
 	db := getDBFromContext(ctx)
 
-	insertSql := `insert into account_flow values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+	insertSql := db.Rebind(`insert into account_flow values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 	_, err := db.Exec(insertSql, flow.Id, flow.UserId, flow.Username, flow.AccountId, flow.Type, flow.Cost, flow.RecordTime,
 		flow.DelFlag, flow.BookId, flow.CategoryId, flow.Remark, flow.TargetAccountId, flow.AssociateName, flow.Finished,
-		flow.BorrowLendId, flow.Profit, flow.SyncState, flow.SyncTime, flow.CreateTime, flow.UpdateTime)
+		flow.BorrowLendId, flow.Profit, flow.Reimburse, flow.SyncState, flow.SyncTime, flow.CreateTime, flow.UpdateTime)
 
 	if err != nil {
 		return errors.Wrap(err, "account flow add store")
@@ -80,12 +80,12 @@ func (af *accountFlow) Add(ctx context.Context, flow *model.AccountFlow) error {
 func (af *accountFlow) Update(ctx context.Context, flow *model.AccountFlow) error {
 	db := getDBFromContext(ctx)
 
-	updateSql := `update account_flow set user_id=?,username=?,account_id=?,type=?,cost=?,record_time=?,del_flag=?,
+	updateSql := db.Rebind(`update account_flow set user_id=?,username=?,account_id=?,type=?,cost=?,record_time=?,del_flag=?,
                         book_id=?,category_id=?,remark=?,target_account_id=?,associate_name=?,finished=?,
-                        borrow_lend_id=?,profit=?,sync_state=?,sync_time=?,create_time=?,update_time=? where id = ?`
+                        borrow_lend_id=?,profit=?,reimburse=?,sync_state=?,sync_time=?,create_time=?,update_time=? where id = ?`)
 	_, err := db.Exec(updateSql, flow.UserId, flow.Username, flow.AccountId, flow.Type, flow.Cost, flow.RecordTime,
 		flow.DelFlag, flow.BookId, flow.CategoryId, flow.Remark, flow.TargetAccountId, flow.AssociateName, flow.Finished,
-		flow.BorrowLendId, flow.Profit, flow.SyncState, flow.SyncTime, flow.CreateTime, flow.UpdateTime, flow.Id)
+		flow.BorrowLendId, flow.Profit, flow.Reimburse, flow.SyncState, flow.SyncTime, flow.CreateTime, flow.UpdateTime, flow.Id)
 	if err != nil {
 		return errors.Wrap(err, "account flow update store")
 	}
@@ -98,7 +98,7 @@ func (af *accountFlow) QueryByBookSyncTimeCount(ctx context.Context, bookId int6
 	db := getDBFromContext(ctx)
 
 	// 查询总记录数
-	querySql := "select count(1) from account_flow where book_id = ? and sync_time > ?"
+	querySql := db.Rebind("select count(1) from account_flow where book_id = ? and sync_time > ?")
 	var count int
 	if err := db.Get(&count, querySql, bookId, syncTime); err != nil {
 		return 0, errors.Wrap(err, "QueryByBookSyncTimeCount err.")
@@ -110,10 +110,10 @@ func (af *accountFlow) QueryByBookSyncTimeCount(ctx context.Context, bookId int6
 func (af *accountFlow) QueryByBookSyncTime(ctx context.Context, bookId int64, syncTime int64, pageNum, pageSize int) ([]*model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from account_flow where book_id = ? and sync_time > ? limit ?, ?"
+	querySql := db.Rebind("select * from account_flow where book_id = ? and sync_time > ? limit ? offset ?")
 
 	var ret []*model.AccountFlow
-	if err := db.Select(&ret, querySql, bookId, syncTime, (pageNum-1)*pageSize, pageSize); err != nil {
+	if err := db.Select(&ret, querySql, bookId, syncTime, pageSize, (pageNum-1)*pageSize); err != nil {
 		return nil, errors.Wrap(err, "QueryByBookSyncTime error.")
 	}
 	if ret == nil {
@@ -127,7 +127,7 @@ func (af *accountFlow) QueryByBookSyncTime(ctx context.Context, bookId int64, sy
 func (af *accountFlow) QueryByUserIdSyncTime(ctx context.Context, userId int64, syncTime int64) ([]*model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from account_flow where user_id = ? and book_id = 0 and sync_time > ? "
+	querySql := db.Rebind("select * from account_flow where user_id = ? and book_id = 0 and sync_time > ? ")
 
 	var ret []*model.AccountFlow
 	if err := db.Select(&ret, querySql, userId, syncTime); err != nil {
@@ -145,7 +145,7 @@ func (af *accountFlow) QueryByUserIdSyncTime(ctx context.Context, userId int64, 
 func (af *accountFlow) Delete(ctx context.Context, id int64) error {
 	db := getDBFromContext(ctx)
 
-	deleteSql := "update account_flow set del_flag = ? where id = ?"
+	deleteSql := db.Rebind("update account_flow set del_flag = ? where id = ?")
 	_, err := db.Exec(deleteSql, constant.DelTrue, id)
 	if err != nil {
 		return errors.Wrap(err, "delete account flow store")
@@ -158,7 +158,7 @@ func (af *accountFlow) Delete(ctx context.Context, id int64) error {
 func (af *accountFlow) DeleteByAccountId(ctx context.Context, accountId int64) error {
 	db := getDBFromContext(ctx)
 
-	deleteSql := "update account_flow set del_flag = ? where account_id =?"
+	deleteSql := db.Rebind("update account_flow set del_flag = ? where account_id =?")
 	_, err := db.Exec(deleteSql, constant.DelTrue, accountId)
 	if err != nil {
 		return errors.Wrap(err, "delete account flow store")
@@ -170,7 +170,7 @@ func (af *accountFlow) DeleteByAccountId(ctx context.Context, accountId int64) e
 func (af *accountFlow) QueryById(ctx context.Context, id int64) (*model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from account_flow where id = ? and del_flag =?"
+	querySql := db.Rebind("select * from account_flow where id = ? and del_flag =?")
 	var accountFlow model.AccountFlow
 	err := db.Get(&accountFlow, querySql, id, constant.DelFalse)
 	if err != nil {
@@ -188,7 +188,7 @@ func (af *accountFlow) QueryByBookIdCount(ctx context.Context, bookId int64) (in
 	db := getDBFromContext(ctx)
 
 	// 查询总记录数
-	querySql := "select count(1) from account_flow where book_id = ? and del_flag = ?"
+	querySql := db.Rebind("select count(1) from account_flow where book_id = ? and del_flag = ?")
 	var count int
 	if err := db.Get(&count, querySql, bookId, constant.DelFalse); err != nil {
 		return 0, errors.Wrap(err, "QueryByBookIdCount err.")
@@ -200,7 +200,7 @@ func (af *accountFlow) QueryByBookIdCount(ctx context.Context, bookId int64) (in
 func (af *accountFlow) QueryByBookIdPage(ctx context.Context, bookId int64, pageNum, pageSize int) ([]model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from account_flow where book_id = ? and del_flag = ? limit ?, ?"
+	querySql := db.Rebind("select * from account_flow where book_id = ? and del_flag = ? limit ?, ?")
 
 	var ret []model.AccountFlow
 	if err := db.Select(&ret, querySql, bookId, constant.DelFalse, (pageNum-1)*pageSize, pageSize); err != nil {
@@ -217,7 +217,7 @@ func (af *accountFlow) QueryByBookIdPage(ctx context.Context, bookId int64, page
 func (af *accountFlow) QueryByAccountId(ctx context.Context, accountId int64) ([]model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from account_flow where (account_id = ? or target_account_id = ?) and del_flag = ? "
+	querySql := db.Rebind("select * from account_flow where (account_id = ? or target_account_id = ?) and del_flag = ? ")
 
 	var ret []model.AccountFlow
 	if err := db.Select(&ret, querySql, accountId, accountId, constant.DelFalse); err != nil {
@@ -233,7 +233,7 @@ func (af *accountFlow) QueryByAccountId(ctx context.Context, accountId int64) ([
 // QueryByBorrowLendId 根据借贷id查询流水
 func (af *accountFlow) QueryByBorrowLendId(ctx context.Context, borrowLendId int64) ([]model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
-	querySql := "select * from account_flow where borrow_lend_id = ? and del_flag = ?"
+	querySql := db.Rebind("select * from account_flow where borrow_lend_id = ? and del_flag = ?")
 
 	var flows []model.AccountFlow
 	if err := db.Select(&flows, querySql, borrowLendId, constant.DelFalse); err != nil {
@@ -249,7 +249,7 @@ func (af *accountFlow) QueryByBorrowLendId(ctx context.Context, borrowLendId int
 // QueryByUserIdAndType 根据userId与类型查询
 func (af *accountFlow) QueryByUserIdAndType(ctx context.Context, userId int64, blType int) ([]model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
-	querySql := "select * from account_flow where user_id = ? and type = ? and del_flag = ?"
+	querySql := db.Rebind("select * from account_flow where user_id = ? and type = ? and del_flag = ?")
 
 	var flows []model.AccountFlow
 	if err := db.Select(&flows, querySql, userId, blType, constant.DelFalse); err != nil {
@@ -267,8 +267,8 @@ func (af *accountFlow) QueryBillTag(ctx context.Context, bookId int64) ([]model.
 	db := getDBFromContext(ctx)
 
 	t := strconv.Itoa(constant.AccountTypeExpense) + "," + strconv.Itoa(constant.AccountTypeIncome)
-	querySql := "SELECT category_id, group_concat(distinct remark) as remark from account_flow where book_id = ? " +
-		"and type in (" + t + ") group by category_id order by record_time desc"
+	querySql := db.Rebind("SELECT category_id, group_concat(distinct remark) as remark from account_flow where book_id = ? " +
+		"and type in (" + t + ") group by category_id order by record_time desc")
 
 	var tags []model.BillTag
 	err := db.Select(&tags, querySql, bookId)
@@ -290,7 +290,7 @@ func (af *accountFlow) QueryBillTag(ctx context.Context, bookId int64) ([]model.
 func (af *accountFlow) FinishedBorrow(ctx context.Context, accountId int64) error {
 	db := getDBFromContext(ctx)
 
-	sql := "update account_flow set finished = ? where account_id = ?"
+	sql := db.Rebind("update account_flow set finished = ? where account_id = ?")
 	_, err := db.Exec(sql, 1, accountId)
 	if err != nil {
 		return errors.Wrap(err, "finished borrowlend store")

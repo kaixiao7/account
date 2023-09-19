@@ -35,7 +35,7 @@ func NewBookStore() BookStore {
 func (b *book) Add(ctx context.Context, book *model.Book) error {
 	db := getDBFromContext(ctx)
 
-	insertSql := "insert into user_book values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	insertSql := db.Rebind("insert into user_book values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	_, err := db.Exec(insertSql, book.Id, book.BookName, book.UserId, book.Cover, book.Budget, book.Type, book.DelFlag, book.SyncState, book.SyncTime,
 		book.CreateTime, book.UpdateTime)
 	if err != nil {
@@ -48,7 +48,7 @@ func (b *book) Add(ctx context.Context, book *model.Book) error {
 func (b *book) Update(ctx context.Context, book *model.Book) error {
 	db := getDBFromContext(ctx)
 
-	updateSql := "update user_book set book_name=?, user_id=?, cover=?, budget=?, type=?,  del_flag=?, sync_state=?, sync_time=?, create_time=?,update_time=? where id=?"
+	updateSql := db.Rebind("update user_book set book_name=?, user_id=?, cover=?, budget=?, type=?,  del_flag=?, sync_state=?, sync_time=?, create_time=?,update_time=? where id=?")
 	_, err := db.Exec(updateSql, book.BookName, book.UserId, book.Cover, book.Budget, book.Type, book.DelFlag, book.SyncState, book.SyncTime,
 		book.CreateTime, book.UpdateTime, book.Id)
 
@@ -61,7 +61,7 @@ func (b *book) Update(ctx context.Context, book *model.Book) error {
 func (b *book) QueryBySyncTime(ctx context.Context, userId int64, syncTime int64) ([]*model.Book, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from user_book where user_id = ? and sync_time > ?"
+	querySql := db.Rebind("select * from user_book where user_id = ? and sync_time > ?")
 
 	var bookList = []*model.Book{}
 	err := db.Select(&bookList, querySql, userId, syncTime)
@@ -76,7 +76,7 @@ func (b *book) QueryBySyncTime(ctx context.Context, userId int64, syncTime int64
 // QueryBookList 查询用户账本列表
 func (b *book) QueryBookList(ctx context.Context, userId int64) ([]*model.Book, error) {
 	db := getDBFromContext(ctx)
-	sql := `
+	sql := db.Rebind(`
 		select *
 		from user_book
 		where del_flag = 0
@@ -85,7 +85,7 @@ func (b *book) QueryBookList(ctx context.Context, userId int64) ([]*model.Book, 
 			from book_member
 			where user_id = ?
 		)
-	`
+	`)
 	var bookList = []*model.Book{}
 	err := db.Select(&bookList, sql, userId)
 
@@ -100,7 +100,7 @@ func (b *book) QueryBookList(ctx context.Context, userId int64) ([]*model.Book, 
 func (b *book) QueryById(ctx context.Context, id int64) (*model.Book, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := "select * from user_book where id = ?"
+	querySql := db.Rebind("select * from user_book where id = ?")
 	var book model.Book
 	err := db.Get(&book, querySql, id)
 	if err != nil {

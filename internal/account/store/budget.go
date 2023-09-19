@@ -25,8 +25,8 @@ func NewBudgetStore() BudgetStore {
 // AddBudget 添加账本总预算
 func (b *budget) AddBudget(ctx context.Context, budget *model.Budget) error {
 	db := getDBFromContext(ctx)
-	sql := `insert into book_budget(id,budget, book_id, type, category_id, create_id, sync_state, sync_time, create_time,
-				update_time) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	sql := db.Rebind(`insert into book_budget(id,budget, book_id, type, category_id, create_id, sync_state, sync_time, create_time,
+				update_time) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 
 	_, err := db.Exec(sql, budget.Id, budget.Budget, budget.BookId, budget.Type, budget.CategoryId, budget.CreateId,
 		budget.SyncState, budget.SyncTime, budget.CreateTime, budget.UpdateTime)
@@ -40,8 +40,8 @@ func (b *budget) AddBudget(ctx context.Context, budget *model.Budget) error {
 // UpdateBudget 更新账本预算
 func (b *budget) UpdateBudget(ctx context.Context, budget *model.Budget) error {
 	db := getDBFromContext(ctx)
-	sql := `update book_budget set budget=?, book_id=?, type=?, category_id=?, create_id=?, sync_state=?, sync_time=?,
-                       update_time=? where id = ?`
+	sql := db.Rebind(`update book_budget set budget=?, book_id=?, type=?, category_id=?, create_id=?, sync_state=?, sync_time=?,
+                       update_time=? where id = ?`)
 
 	_, err := db.Exec(sql, budget.Budget, budget.BookId, budget.Type, budget.CategoryId, budget.CreateId,
 		budget.SyncState, budget.SyncTime, budget.UpdateTime, budget.Id)
@@ -54,7 +54,7 @@ func (b *budget) UpdateBudget(ctx context.Context, budget *model.Budget) error {
 
 func (b *budget) QueryBySyncTime(ctx context.Context, bookId int64, syncTime int64) ([]*model.Budget, error) {
 	db := getDBFromContext(ctx)
-	querySql := "select * from book_budget where book_id = ? and sync_time > ?"
+	querySql := db.Rebind("select * from book_budget where book_id = ? and sync_time > ?")
 
 	var budgetList = []*model.Budget{}
 	err := db.Select(&budgetList, querySql, bookId, syncTime)
@@ -73,7 +73,7 @@ func (b *budget) QueryBySyncTime(ctx context.Context, bookId int64, syncTime int
 // QueryByBookId 查询账本预算
 func (b *budget) QueryByBookId(ctx context.Context, bookId int64) ([]*model.Budget, error) {
 	db := getDBFromContext(ctx)
-	querySql := "select * from book_budget where book_id = ?"
+	querySql := db.Rebind("select * from book_budget where book_id = ?")
 
 	var budgetList = []*model.Budget{}
 	err := db.Select(&budgetList, querySql, bookId)
