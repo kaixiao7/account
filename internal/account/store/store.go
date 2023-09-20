@@ -8,6 +8,7 @@ import (
 
 	"kaixiao7/account/internal/pkg/constant"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -31,6 +32,7 @@ var db *sqlx.DB
 
 // DBOption 数据库连接参数
 type DBOption struct {
+	Name                  string
 	Host                  string
 	Username              string
 	Password              string
@@ -42,7 +44,14 @@ type DBOption struct {
 }
 
 func Init(option *DBOption) (*sqlx.DB, error) {
-	sqlxDB, err := newPgDB(option)
+	var sqlxDB *sqlx.DB
+	var err error
+	if option.Name == "mysql" {
+		sqlxDB, err = newMysqlDB(option)
+	} else if option.Name == "pg" {
+		sqlxDB, err = newPgDB(option)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -72,25 +81,25 @@ func newPgDB(opts *DBOption) (*sqlx.DB, error) {
 	return sqlxDB, nil
 }
 
-// func newMysqlDB(opts *DBOption) (*sqlx.DB, error) {
-// 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&tls=%t",
-// 		opts.Username,
-// 		opts.Password,
-// 		opts.Host,
-// 		opts.Database,
-// 		opts.Tls)
-// 	db, err := sql.Open("mysql", dsn)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	db.SetMaxOpenConns(opts.MaxOpenConnections)
-// 	db.SetMaxIdleConns(opts.MaxIdleConnections)
-// 	db.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
-//
-// 	sqlxDB := sqlx.NewDb(db, "mysql")
-// 	return sqlxDB, nil
-// }
+func newMysqlDB(opts *DBOption) (*sqlx.DB, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&tls=%t",
+		opts.Username,
+		opts.Password,
+		opts.Host,
+		opts.Database,
+		opts.Tls)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	db.SetMaxOpenConns(opts.MaxOpenConnections)
+	db.SetMaxIdleConns(opts.MaxIdleConnections)
+	db.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
+
+	sqlxDB := sqlx.NewDb(db, "mysql")
+	return sqlxDB, nil
+}
 
 // func newSqliteDB(opts *DBOption) (*sqlx.DB, error) {
 // 	dsn := fmt.Sprintf("file:%s", opts.File)

@@ -59,6 +59,7 @@ func NewAccountServerCommand() *cobra.Command {
 func run() error {
 	// 初始化数据库配置
 	db, err := store.Init(&store.DBOption{
+		Name:                  viper.GetString("db.name"),
 		Host:                  viper.GetString("db.host"),
 		Username:              viper.GetString("db.username"),
 		Password:              viper.GetString("db.password"),
