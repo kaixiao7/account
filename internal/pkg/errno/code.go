@@ -12,10 +12,11 @@ var (
 	ErrToken          = &Errno{Code: 10003, Message: "JWT签名失败", Http: http.StatusInternalServerError}
 	ErrIllegalOperate = &Errno{Code: 10004, Message: "非法操作"}
 
-	ErrUserNotFound      = &Errno{Code: 10101, Message: "用户不存在"}
-	ErrUserAlreadyExist  = &Errno{Code: 10102, Message: "用户已存在"}
-	ErrTokenInvalid      = &Errno{Code: 10103, Message: "Token过期", Http: http.StatusUnauthorized}
-	ErrPasswordIncorrect = &Errno{Code: 10104, Message: "用户名或密码错误"}
+	ErrUserNotFound         = &Errno{Code: 10101, Message: "用户不存在"}
+	ErrUserAlreadyExist     = &Errno{Code: 10102, Message: "用户已存在"}
+	ErrTokenInvalid         = &Errno{Code: 10103, Message: "Token过期", Http: http.StatusUnauthorized}
+	ErrPasswordIncorrect    = &Errno{Code: 10104, Message: "用户名或密码错误"}
+	ErrOldPasswordIncorrect = &Errno{Code: 10104, Message: "原密码错误"}
 
 	ErrCategoryNotFound = &Errno{Code: 10201, Message: "分类不存在"}
 

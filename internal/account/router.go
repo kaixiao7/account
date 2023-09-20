@@ -41,6 +41,8 @@ func installController(g *gin.Engine) {
 	users := g.Group("/users")
 	{
 		users.GET("/info", userController.Get)
+		users.PUT("", userController.Update)
+		users.PUT("/changePwd", userController.ChangePassword)
 	}
 
 	books := g.Group("/books")

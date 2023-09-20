@@ -8,6 +8,6 @@ type User struct {
 	Gender       int    `db:"gender" json:"gender"`               // 性别，0-男，1-女
 	Password     string `db:"password" json:"-"`                  // 密码
 	Avatar       string `db:"avatar" json:"avatar"`               // 头像
-	RegisterTime int    `db:"register_time" json:"register_time"` // 注册时间
-	UpdateTime   int    `db:"update_time" json:"update_time"`
+	RegisterTime int64  `db:"register_time" json:"register_time"` // 注册时间
+	UpdateTime   int64  `db:"update_time" json:"update_time"`
 }
