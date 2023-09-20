@@ -1,0 +1,28 @@
+run_mode: debug
+port: :8080
+jwt:
+  secret: adsToas97s # jwt签名密钥
+  token-access-expire: 7200           # access token  过期时间，7200秒，2个小时
+  token-refresh-expire: 2592000       # refresh token 过期时间，30天，单位：秒
+
+log:
+  level: debug
+  path: "./logs"
+  filename: "account.log"
+  enable-stdout: true
+
+db:
+  name: "pg" # 当前支持postgresql与mysql
+  host: localhost:5432 # ip与端口
+  username:
+  password:
+  database:
+  sslMode: require
+#  host:
+#  username:
+#  password:
+#  database:
+#  tls: false
+  max-idle-connections: 10      # 最大空闲连接数
+  max-open-connections: 10      # 最大打开连接数
+  max-connection-life-time: 30  # 空闲连接最大存活时间 30s

@@ -34,3 +34,6 @@ cmd/trans
 
 # db
 account.db
+
+# config file
+*.yaml
