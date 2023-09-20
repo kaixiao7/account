@@ -65,6 +65,7 @@ func run() error {
 		Password:              viper.GetString("db.password"),
 		Database:              viper.GetString("db.database"),
 		Tls:                   viper.GetBool("db.tls"),
+		SslMode:               viper.GetString("db.sslMode"),
 		MaxIdleConnections:    viper.GetInt("db.max-idle-connections"),
 		MaxOpenConnections:    viper.GetInt("db.max-open-connections"),
 		MaxConnectionLifeTime: viper.GetInt("db.max-connection-life-time"),

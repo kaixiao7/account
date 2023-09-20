@@ -38,6 +38,7 @@ type DBOption struct {
 	Password              string
 	Database              string
 	Tls                   bool
+	SslMode               string
 	MaxIdleConnections    int
 	MaxOpenConnections    int
 	MaxConnectionLifeTime int
@@ -63,11 +64,13 @@ func Init(option *DBOption) (*sqlx.DB, error) {
 
 func newPgDB(opts *DBOption) (*sqlx.DB, error) {
 	// postgres://username:password@localhost:5432/database_name
-	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
+	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
 		opts.Username,
 		opts.Password,
 		opts.Host,
-		opts.Database)
+		opts.Database,
+		opts.SslMode,
+	)
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
