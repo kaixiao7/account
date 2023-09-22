@@ -79,7 +79,7 @@ func (a *account) QueryBySyncTime(ctx context.Context, userId int64, syncTime in
 	querySql := db.Rebind("select * from user_account where user_id = ? and sync_time > ?")
 
 	var accounts = []model.Account{}
-	err := db.Select(&accounts, querySql, userId, constant.DelFalse)
+	err := db.Select(&accounts, querySql, userId, syncTime)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return accounts, nil
