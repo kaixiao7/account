@@ -97,7 +97,7 @@ func (c *category) Update(ctx context.Context, category *model.Category) error {
 
 	sql := db.Rebind(`update category set name=?,icon=?,color=?,sort=?,type=?,book_id=?,user_id=?,del_flag=?,sync_state=?,sync_time=?,update_time=? where id=?`)
 	_, err := db.Exec(sql, category.Name, category.Icon, category.Color, category.Sort, category.Type, category.BookId,
-		category.UserId, category.DelFlag, category.SyncState, category.SyncTime, category.UpdateTime)
+		category.UserId, category.DelFlag, category.SyncState, category.SyncTime, category.UpdateTime, category.Id)
 	if err != nil {
 		return errors.Wrap(err, "update category store.")
 	}
