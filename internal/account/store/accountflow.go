@@ -24,6 +24,8 @@ type AccountFlow interface {
 	QueryByBookSyncTime(ctx context.Context, bookId int64, syncTime int64, pageNum, pageSize int) ([]*model.AccountFlow, error)
 	// QueryByUserIdSyncTime 根据用户id及同步时间查询流水记录，不包括账本的记录
 	QueryByUserIdSyncTime(ctx context.Context, userId int64, syncTime int64) ([]*model.AccountFlow, error)
+	// QueryByBookIdPull 根据账本id同步指定时间范围内的数据
+	QueryByBookIdPull(ctx context.Context, bookId, startTime, endTime, syncTime int64) ([]*model.AccountFlow, error)
 
 	// Delete 删除账户流水
 	// 逻辑删除，将字段del置为1
@@ -104,6 +106,23 @@ func (af *accountFlow) QueryByBookSyncTimeCount(ctx context.Context, bookId int6
 		return 0, errors.Wrap(err, "QueryByBookSyncTimeCount err.")
 	}
 	return count, nil
+}
+
+// QueryByBookIdPull 根据账本id同步指定时间范围内的数据
+func (af *accountFlow) QueryByBookIdPull(ctx context.Context, bookId, startTime, endTime, syncTime int64) ([]*model.AccountFlow, error) {
+	db := getDBFromContext(ctx)
+
+	querySql := db.Rebind("select * from account_flow where book_id = ? and record_time > ? and record_time < ? and sync_time > ?")
+
+	var ret []*model.AccountFlow
+	if err := db.Select(&ret, querySql, bookId, startTime, endTime, syncTime); err != nil {
+		return nil, errors.Wrap(err, "QueryByBookSyncTime error.")
+	}
+	if ret == nil {
+		ret = []*model.AccountFlow{}
+	}
+
+	return ret, nil
 }
 
 // QueryByBookSyncTime 根据同步时间分页查询账本的流水记录

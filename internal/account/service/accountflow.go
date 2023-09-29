@@ -19,6 +19,8 @@ type AccountFlowSrv interface {
 	Push(ctx context.Context, flows []*model.AccountFlow, syncTime int64) error
 	// PullBook 客户端从服务端拉取账本数据
 	PullBook(ctx context.Context, bookId int64, lastSyncTime int64, pageNum int) (model.Page, error)
+	// PullBookRange 客户端从服务端拉取账本指定时间范围的数据
+	PullBookRange(ctx context.Context, bookId, startTime, endTime, syncTime int64) ([]*model.AccountFlow, error)
 	// PullOther 客户端从服务拉取除账本外的其他流水
 	PullOther(ctx context.Context, userId int64, lastSyncTime int64) ([]*model.AccountFlow, error)
 
@@ -60,6 +62,11 @@ func (af *accountFlowService) Push(ctx context.Context, flows []*model.AccountFl
 
 		return nil
 	})
+}
+
+// PullBookRange 客户端从服务端拉取账本指定时间范围的数据
+func (af *accountFlowService) PullBookRange(ctx context.Context, bookId, startTime, endTime, syncTime int64) ([]*model.AccountFlow, error) {
+	return af.accountFlowStore.QueryByBookIdPull(ctx, bookId, startTime, endTime, syncTime)
 }
 
 // PullBook 客户端从服务端拉取账本数据

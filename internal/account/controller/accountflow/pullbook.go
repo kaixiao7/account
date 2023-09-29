@@ -19,16 +19,28 @@ func (af *AccountFlowController) PullBook(c *gin.Context) {
 		return
 	}
 
-	pageNum, exist := controller.GetInt64ParamFromParam(c, "pageNum")
+	startTime, exist := controller.GetInt64ParamFromParam(c, "startTime")
 	if !exist {
 		return
 	}
 
-	flowPages, err := af.accountFlowSrv.PullBook(c, bookId, lastSyncTime, int(pageNum))
+	endTime, exist := controller.GetInt64ParamFromParam(c, "endTime")
+	if !exist {
+		return
+	}
+
+	// pageNum, exist := controller.GetInt64ParamFromParam(c, "pageNum")
+	// if !exist {
+	// 	return
+	// }
+
+	// flowPages, err := af.accountFlowSrv.PullBook(c, bookId, lastSyncTime, int(pageNum))
+
+	flows, err := af.accountFlowSrv.PullBookRange(c, bookId, startTime, endTime, lastSyncTime)
 	if err != nil {
 		core.WriteRespErr(c, err)
 		return
 	}
 
-	core.WriteRespSuccess(c, flowPages)
+	core.WriteRespSuccess(c, flows)
 }
