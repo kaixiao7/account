@@ -17,7 +17,7 @@ type AccountFlow struct {
 	Finished        *int     `db:"finished" json:"finished,omitempty"`
 	BorrowLendId    *int64   `db:"borrow_lend_id" json:"borrow_lend_id,omitempty"`
 	Profit          *float64 `db:"profit" json:"profit,omitempty"`
-	Reimburse       int      `db:"reimburse" json:"reimburse"`
+	Reimburse       *float64 `db:"reimburse" json:"reimburse"`
 	SyncState       int      `db:"sync_state" json:"sync_state"`
 	SyncTime        int64    `db:"sync_time" json:"sync_time"`
 	CreateTime      int64    `db:"create_time" json:"create_time,omitempty"`
