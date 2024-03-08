@@ -7,6 +7,7 @@ import (
 	"kaixiao7/account/internal/account/controller/budget"
 	"kaixiao7/account/internal/account/controller/category"
 	"kaixiao7/account/internal/account/controller/member"
+	"kaixiao7/account/internal/account/controller/tag"
 	"kaixiao7/account/internal/account/controller/user"
 	"kaixiao7/account/internal/pkg/core"
 	"kaixiao7/account/internal/pkg/errno"
@@ -81,6 +82,14 @@ func installController(g *gin.Engine) {
 		categories.POST("/push", categoryController.Push)
 
 		g.GET("/categories", categoryController.ListUser)
+	}
+
+	tags := g.Group("/books/:bookId/tags")
+	{
+		tagController := tag.NewCategoryTagController()
+
+		tags.GET("/pull", tagController.Pull)
+		tags.POST("/push", tagController.Push)
 	}
 
 	// bills := g.Group("/books/:bookId/bills")
