@@ -43,13 +43,13 @@ func NewAccountStore() AccountStore {
 func (a *account) Add(ctx context.Context, account *model.Account) error {
 	db := getDBFromContext(ctx)
 
-	insertSql := db.Rebind(`insert into user_account(id, user_id, account_type, account_name, balance, init, icon, del, is_total,
-						remark, sync_state, sync_time, create_time, update_time)
-					values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	insertSql := db.Rebind(`insert into user_account(id, user_id, account_type, account_name, balance, init, icon, sort, del, is_total,
+						remark, arrear, bill_day, repayment_day, calc_last, sync_state, sync_time, create_time, update_time)
+					values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 
 	_, err := db.Exec(insertSql, account.Id, account.UserId, account.AccountType, account.AccountName, account.Balance,
-		account.Init, account.Icon, account.Del, account.IsTotal, account.Remark, account.SyncState, account.SyncTime,
-		account.CreateTime, account.UpdateTime)
+		account.Init, account.Icon, account.Sort, account.Del, account.IsTotal, account.Remark, account.Arrear, account.BillDay,
+		account.RepaymentDay, account.CalcLast, account.SyncState, account.SyncTime, account.CreateTime, account.UpdateTime)
 
 	if err != nil {
 		return errors.Wrap(err, "account add store")
@@ -61,11 +61,12 @@ func (a *account) Add(ctx context.Context, account *model.Account) error {
 // Update 更新账户
 func (a *account) Update(ctx context.Context, account *model.Account) error {
 	db := getDBFromContext(ctx)
-	updateSql := db.Rebind(`update user_account set user_id=?,account_type=?,account_name=?,balance=?,init=?,icon=?,del=?,
-                        is_total=?,remark=?,sync_state=?,sync_time=?,update_time=? where id = ?`)
+	updateSql := db.Rebind(`update user_account set user_id=?,account_type=?,account_name=?,balance=?,init=?,icon=?,sort=?,del=?,
+                        is_total=?,remark=?,arrear=?,bill_day=?,repayment_day=?,calc_last=?,sync_state=?,sync_time=?,update_time=? where id = ?`)
 
 	_, err := db.Exec(updateSql, account.UserId, account.AccountType, account.AccountName, account.Balance, account.Init,
-		account.Icon, account.Del, account.IsTotal, account.Remark, account.SyncState, account.SyncTime, account.UpdateTime, account.Id)
+		account.Icon, account.Sort, account.Del, account.IsTotal, account.Remark, account.Arrear, account.BillDay,
+		account.RepaymentDay, account.CalcLast, account.SyncState, account.SyncTime, account.UpdateTime, account.Id)
 	if err != nil {
 		return errors.Wrap(err, "account update store")
 	}
