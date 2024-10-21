@@ -112,7 +112,7 @@ func (af *accountFlow) QueryByBookSyncTimeCount(ctx context.Context, bookId int6
 func (af *accountFlow) QueryByBookIdPull(ctx context.Context, bookId, startTime, endTime, syncTime int64) ([]*model.AccountFlow, error) {
 	db := getDBFromContext(ctx)
 
-	querySql := db.Rebind("select * from account_flow where book_id = ? and record_time > ? and record_time < ? and sync_time > ?")
+	querySql := db.Rebind("select * from account_flow where book_id = ? and record_time >= ? and record_time < ? and sync_time > ?")
 
 	var ret []*model.AccountFlow
 	if err := db.Select(&ret, querySql, bookId, startTime, endTime, syncTime); err != nil {
