@@ -66,10 +66,11 @@ func NewAccountFlowStore() AccountFlow {
 func (af *accountFlow) Add(ctx context.Context, flow *model.AccountFlow) error {
 	db := getDBFromContext(ctx)
 
-	insertSql := db.Rebind(`insert into account_flow values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+	insertSql := db.Rebind(`insert into account_flow values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 	_, err := db.Exec(insertSql, flow.Id, flow.UserId, flow.Username, flow.AccountId, flow.Type, flow.Cost, flow.RecordTime,
-		flow.DelFlag, flow.BookId, flow.CategoryId, flow.Remark, flow.TargetAccountId, flow.AssociateName, flow.Finished,
-		flow.BorrowLendId, flow.Profit, flow.Reimburse, flow.SyncState, flow.SyncTime, flow.CreateTime, flow.UpdateTime)
+		flow.DelFlag, flow.BookId, flow.CategoryId, flow.Remark, flow.TargetAccountId, flow.AccountBalance, flow.TargetAccountBalance,
+		flow.AssociateName, flow.Finished, flow.BorrowLendId, flow.Profit, flow.Reimburse, flow.SyncState, flow.SyncTime,
+		flow.CreateTime, flow.UpdateTime)
 
 	if err != nil {
 		return errors.Wrap(err, "account flow add store")
@@ -83,10 +84,10 @@ func (af *accountFlow) Update(ctx context.Context, flow *model.AccountFlow) erro
 	db := getDBFromContext(ctx)
 
 	updateSql := db.Rebind(`update account_flow set user_id=?,username=?,account_id=?,type=?,cost=?,record_time=?,del_flag=?,
-                        book_id=?,category_id=?,remark=?,target_account_id=?,associate_name=?,finished=?,
+                        book_id=?,category_id=?,remark=?,target_account_id=?,account_balance=?,target_account_balance=?,associate_name=?,finished=?,
                         borrow_lend_id=?,profit=?,reimburse=?,sync_state=?,sync_time=?,create_time=?,update_time=? where id = ?`)
 	_, err := db.Exec(updateSql, flow.UserId, flow.Username, flow.AccountId, flow.Type, flow.Cost, flow.RecordTime,
-		flow.DelFlag, flow.BookId, flow.CategoryId, flow.Remark, flow.TargetAccountId, flow.AssociateName, flow.Finished,
+		flow.DelFlag, flow.BookId, flow.CategoryId, flow.Remark, flow.TargetAccountId, flow.AccountBalance, flow.TargetAccountBalance, flow.AssociateName, flow.Finished,
 		flow.BorrowLendId, flow.Profit, flow.Reimburse, flow.SyncState, flow.SyncTime, flow.CreateTime, flow.UpdateTime, flow.Id)
 	if err != nil {
 		return errors.Wrap(err, "account flow update store")
