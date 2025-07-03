@@ -8,6 +8,7 @@ import (
 
 	"kaixiao7/account/internal/pkg/constant"
 
+	_ "github.com/glebarez/go-sqlite"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -51,6 +52,8 @@ func Init(option *DBOption) (*sqlx.DB, error) {
 		sqlxDB, err = newMysqlDB(option)
 	} else if option.Name == "pg" {
 		sqlxDB, err = newPgDB(option)
+	} else if option.Name == "sqlite" {
+		sqlxDB, err = newSqliteDB(option)
 	}
 
 	if err != nil {
@@ -104,21 +107,21 @@ func newMysqlDB(opts *DBOption) (*sqlx.DB, error) {
 	return sqlxDB, nil
 }
 
-// func newSqliteDB(opts *DBOption) (*sqlx.DB, error) {
-// 	dsn := fmt.Sprintf("file:%s", opts.File)
-// 	sqlDB, err := sql.Open("sqlite3", dsn)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	sqlDB.SetMaxOpenConns(opts.MaxOpenConnections)
-// 	sqlDB.SetMaxIdleConns(opts.MaxIdleConnections)
-// 	sqlDB.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
-//
-// 	sqlxDB := sqlx.NewDb(sqlDB, "sqlite3")
-//
-// 	return sqlxDB, nil
-// }
+func newSqliteDB(opts *DBOption) (*sqlx.DB, error) {
+	dsn := fmt.Sprintf("file:%s", opts.Host)
+	sqlDB, err := sql.Open("sqlite", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB.SetMaxOpenConns(opts.MaxOpenConnections)
+	sqlDB.SetMaxIdleConns(opts.MaxIdleConnections)
+	sqlDB.SetConnMaxLifetime(time.Duration(opts.MaxConnectionLifeTime))
+
+	sqlxDB := sqlx.NewDb(sqlDB, "sqlite3")
+
+	return sqlxDB, nil
+}
 
 func Close() error {
 	if db == nil {

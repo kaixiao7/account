@@ -12,13 +12,15 @@ log:
   enable-stdout: true
 
 db:
-  name: "pg" # 当前支持postgresql与mysql
-  host: localhost:5432 # ip与端口
-  username:
-  password:
-  database:
-  sslMode: require
-#  host:
+  name: "sqlite"
+  host: "./account_back.db"
+#  name: "pg" # 当前支持postgresql与mysql
+#  host: localhost:5432 # ip与端口
+#  username:
+#  password:
+#  database:
+#  sslMode: require
+##  host:
 #  username:
 #  password:
 #  database:
